@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>BetCrash — Create account</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,13 +39,13 @@
 
   .card{
     width:100%;max-width:460px;background:var(--panel);border:1px solid var(--panel-line);
-    border-radius:16px;padding:28px;
+    border-radius:20px;padding:28px;box-shadow:0 28px 80px rgba(0,0,0,0.18);
   }
-  .card h2{font-family:'Space Grotesk';font-size:20px;margin:0 0 4px;font-weight:700;}
-  .card .desc{font-size:13px;color:var(--text-mid);margin-bottom:22px;line-height:1.5;}
+  .card h2{font-family:'Space Grotesk';font-size:22px;margin:0 0 8px;font-weight:700;}
+  .card .desc{font-size:14px;color:var(--text-mid);margin-bottom:24px;line-height:1.6;}
 
-  label{font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-mid);font-weight:600;display:block;margin-bottom:6px;}
-  .field{margin-bottom:14px;}
+  label{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-mid);font-weight:600;display:block;margin-bottom:8px;}
+  .field{margin-bottom:16px;}
   input, select{
     width:100%;background:var(--void);border:1px solid var(--panel-line);border-radius:9px;
     padding:11px 12px;color:var(--text-hi);font-family:'Inter';font-size:14px;outline:none;
@@ -55,24 +56,27 @@
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 
   .btn{
-    width:100%;padding:13px;border:none;border-radius:10px;font-family:'Space Grotesk';font-weight:700;
-    font-size:14.5px;cursor:pointer;background:var(--green);color:#062616;margin-top:6px;
+    width:100%;padding:14px 16px;border:none;border-radius:12px;font-family:'Space Grotesk';font-weight:700;
+    font-size:15px;cursor:pointer;background:var(--green);color:#062616;margin-top:10px;transition:transform .2s ease,background .2s ease;
   }
+  .btn:hover:not(:disabled){transform:translateY(-1px);}
   .btn:disabled{background:var(--panel-raised);color:var(--text-low);cursor:not-allowed;}
   .btn.secondary{background:transparent;border:1px solid var(--panel-line);color:var(--text-mid);margin-top:8px;}
   .link{color:var(--yellow);cursor:pointer;font-weight:600;}
 
   /* OTP */
-  .otp-row{display:flex;gap:8px;margin-bottom:6px;}
+  .otp-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
   .otp-row input{
-    text-align:center;font-family:'JetBrains Mono';font-size:20px;font-weight:700;padding:12px 0;
+    flex:1 1 44px;text-align:center;font-family:'JetBrains Mono';font-size:20px;font-weight:700;padding:14px 0;
+    min-width:44px;border-radius:12px;
   }
   .resend{font-size:12.5px;color:var(--text-mid);margin-top:12px;text-align:center;}
 
   /* KYC upload */
   .upload-box{
-    border:1.5px dashed var(--panel-line);border-radius:12px;padding:20px;text-align:center;
-    margin-bottom:14px;cursor:pointer;transition:border-color .15s ease;
+    border:1.5px dashed var(--panel-line);border-radius:14px;padding:20px;text-align:center;
+    margin-bottom:14px;cursor:pointer;transition:border-color .15s ease,background .2s ease;
+    min-height:118px;display:flex;flex-direction:column;justify-content:center;
   }
   .upload-box:hover{border-color:var(--green);}
   .upload-box.filled{border-style:solid;border-color:var(--green);background:var(--green-dim);}
@@ -96,7 +100,23 @@
   .check-mark.wait{background:var(--panel-raised);border:1px solid var(--panel-line);color:var(--text-low);}
   .check-row.wait{color:var(--text-mid);}
 
-  .foot-note{font-size:11.5px;color:var(--text-low);text-align:center;margin-top:16px;line-height:1.5;}
+  .foot-note{font-size:11.5px;color:var(--text-low);text-align:center;margin-top:18px;line-height:1.6;}
+
+  @media (max-width:680px) {
+    body{padding:20px 14px 50px;}
+    .brand{flex-direction:column;align-items:center;margin-bottom:20px;text-align:center;}
+    .brand-name{font-size:18px;}
+    .stepper{margin-bottom:18px;}
+    .card{padding:22px;}
+    .row2{grid-template-columns:1fr;}
+    .field{margin-bottom:14px;}
+    input, select{font-size:15px;padding:13px 12px;}
+    .btn{font-size:15px;padding:14px 16px;}
+    .upload-box{padding:18px;}
+    .otp-row{gap:6px;}
+    .otp-row input{flex:1 1 1ce;min-width:56px;font-size:18px;padding:12px 0;}
+    .check-row{font-size:13px;}
+  }
 </style>
 </head>
 <body>
@@ -111,12 +131,95 @@
 <div class="card" id="card"></div>
 
 <script>
+const API_BASE = 'http://localhost:3333';
 const STEPS=['register','phone_otp','kyc','pending','verified'];
 let stepIdx=0;
 let userData={name:'',email:'',phone:'',password:'',dob:'',idNumber:'',idDoc:false,selfie:false};
 
 // mock registry — in production this is a backend lookup against every verified account's ID number
 const REGISTERED_ID_NUMBERS=['34567891','29981144','40112203'];
+
+function getAuthToken(){
+  return window.localStorage.getItem('betcrashAccessToken');
+}
+
+function getRefreshToken(){
+  return window.localStorage.getItem('betcrashRefreshToken');
+}
+
+function setAuthTokens(auth){
+  if(auth.accessToken){
+    window.localStorage.setItem('betcrashAccessToken', auth.accessToken);
+  }
+  if(auth.refreshToken){
+    window.localStorage.setItem('betcrashRefreshToken', auth.refreshToken);
+  }
+}
+
+function authHeaders(){
+  const token = getAuthToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+async function refreshAuth(){
+  const refreshToken = getRefreshToken();
+  if(!refreshToken){
+    throw new Error('Missing refresh token');
+  }
+  const data = await fetchJson(`${API_BASE}/auth/refresh`, {
+    method: 'POST',
+    body: JSON.stringify({ refreshToken }),
+  }, false);
+  setAuthTokens(data);
+  return data;
+}
+
+async function fetchJson(url, options = {}, retry = true){
+  const isJson = !options.headers || !options.headers['Content-Type'];
+  const headers = {
+    'Content-Type': isJson ? 'application/json' : undefined,
+    ...authHeaders(),
+    ...options.headers,
+  };
+
+  const res = await fetch(url, {
+    ...options,
+    headers,
+  });
+
+  const data = await res.json().catch(()=>null);
+  if(res.ok){
+    return data;
+  }
+
+  if(res.status === 401 && retry && !url.endsWith('/auth/refresh')){
+    await refreshAuth();
+    return fetchJson(url, options, false);
+  }
+
+  throw new Error(data?.message || data?.error || res.statusText || 'Request failed');
+}
+
+async function registerUser(payload){
+  return fetchJson(`${API_BASE}/auth/register`, {
+    method:'POST',
+    body: JSON.stringify(payload),
+  }, false);
+}
+
+async function getMe(){
+  return fetchJson(`${API_BASE}/auth/me`, {
+    method: 'GET',
+    headers: authHeaders(),
+  });
+}
+
+function setRegisterHint(message, isError=false){
+  const hint=document.getElementById('rHint');
+  if(!hint) return;
+  hint.className=isError?'hint err':'hint';
+  hint.textContent=message;
+}
 
 function renderStepper(){
   const el=document.getElementById('stepper');
@@ -245,11 +348,30 @@ function bindEvents(step){
       document.getElementById('rBtn').disabled=!ok;
     };
     ['rName','rEmail','rPhone','rPass','rPass2'].forEach(id=>document.getElementById(id).addEventListener('input',check));
-    document.getElementById('rBtn').addEventListener('click',()=>{
+    document.getElementById('rBtn').addEventListener('click',async()=>{
       userData.name=document.getElementById('rName').value;
       userData.email=document.getElementById('rEmail').value;
       userData.phone=document.getElementById('rPhone').value;
-      goTo('phone_otp');
+      userData.password=document.getElementById('rPass').value;
+      setRegisterHint('Creating account...');
+      document.getElementById('rBtn').disabled=true;
+      try {
+        const auth = await registerUser({
+          name: userData.name,
+          email: userData.email,
+          phone: userData.phone,
+          password: userData.password,
+        });
+        setAuthTokens(auth);
+
+        await getMe();
+        setRegisterHint('Account created, redirecting to OTP...');
+        goTo('phone_otp');
+      } catch (error) {
+        setRegisterHint(error.message || 'Registration failed', true);
+      } finally {
+        document.getElementById('rBtn').disabled=false;
+      }
     });
   }
   if(step==='email_otp' || step==='phone_otp'){

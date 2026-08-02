@@ -1,0 +1,18 @@
+# Root-level ignored files
+.env
+.env.local
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Backend app ignored files
+apps/backend/node_modules/
+apps/backend/dist/
+apps/backend/.env
+apps/backend/.env.local
+apps/backend/tsconfig.build.tsbuildinfo
+
+# Editor files
+.vscode/
+.idea/
+.DS_Store
