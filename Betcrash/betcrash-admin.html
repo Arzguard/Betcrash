@@ -3,35 +3,46 @@
 <head>
 <meta charset="UTF-8">
 <title>BetCrash — Admin</title>
+  <link rel="icon" href="/favicon/favicon.svg" type="image/svg+xml">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" href="/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/favicon/site.webmanifest">
+  <meta name="theme-color" content="#16123A">
+  <meta name="color-scheme" content="dark">
+  <meta property="og:title" content="BetCrash">
+  <meta property="og:description" content="Premium crash gaming">
+  <meta property="og:image" content="/favicon/og-image.png">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="BetCrash">
+  <meta name="twitter:description" content="Premium crash gaming">
+  <meta name="twitter:image" content="/favicon/og-image.png">
+  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#38F29F">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --void: #0E0C2B;
-    --panel: #17144A;
-    --panel-raised: #201C5C;
-    --panel-line: #2C2870;
-    --green: #33E28A;
-    --green-dim: rgba(51,226,138,0.14);
-    --yellow: #FFD23F;
-    --yellow-dim: rgba(255,210,63,0.13);
-    --red: #FF5C6C;
-    --red-dim: rgba(255,92,108,0.14);
-    --text-hi: #F5F4FF;
-    --text-mid: #9C98CC;
-    --text-low: #625E96;
-  }
+  --void:#16123A; --panel:#2A236B; --panel-raised:#211B55; --panel-line:#39327E;
+  --green:#38F29F; --green-dim:rgba(56,242,159,0.14);
+  --yellow:#FFD24A; --yellow-dim:rgba(255,210,74,0.13);
+  --red:#FF4D6D; --red-dim:rgba(255,77,109,0.14);
+  --text-hi:#FFFFFF; --text-mid:#A8A4D6; --text-low:#706A9B;
+}
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
-    background: radial-gradient(120% 140% at 100% -10%, #211D63 0%, var(--void) 55%);
+    background: radial-gradient(120% 140% at 100% -10%, #211B55 0%, var(--void) 55%);
     color:var(--text-hi);
     font-family:'Inter',sans-serif;
     min-height:100vh;
     display:flex;
   }
   ::selection{background:var(--yellow);color:var(--void);}
+  .panel:hover,.balance-card:hover,.bet-card:hover,.players:hover{box-shadow:0 8px 24px rgba(0,0,0,.25);transform:translateY(-1px);transition:transform .15s ease,box-shadow .15s ease;}
+  input:focus,textarea:focus{outline:none;border-color:var(--green)!important;box-shadow:0 0 0 3px rgba(56,242,159,.18);}
+  .btn:active{transform:scale(.97);transition:transform .12s ease;}
   a{color:inherit;text-decoration:none;}
 
   /* ---------- Sidebar ---------- */
@@ -210,6 +221,17 @@
 </style>
 </head>
 <body>
+<div id="app-loader" style="position:fixed;inset:0;z-index:9999;background:#16123A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;opacity:1;transition:opacity .4s ease,visibility .4s ease;">
+  <div style="width:48px;height:48px;animation:neo-pulse 1.2s ease-in-out infinite;">
+    <img src="/favicon/favicon.svg" alt="" width="48" height="48">
+  </div>
+  <div style="font-family:'Space Grotesk';font-weight:700;font-size:18px;color:#38F29F;letter-spacing:.02em;">BetCrash</div>
+</div>
+<style>
+@keyframes neo-pulse{0%,100%{filter:drop-shadow(0 0 6px rgba(56,242,159,.3));transform:scale(1);}50%{filter:drop-shadow(0 0 16px rgba(56,242,159,.6));transform:scale(1.05);}}
+</style>
+<script>window.addEventListener('load',()=>{const l=document.getElementById('app-loader');if(l){setTimeout(()=>{l.style.opacity='0';setTimeout(()=>l.remove(),500)},700);}});</script>
+
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
     <h2>Admin access</h2>
@@ -231,7 +253,7 @@
 <div class="app-shell hidden" id="appShell">
 <div class="sidebar">
   <div class="brand">
-    <div class="brand-mark">B</div>
+    <div class="brand-mark"><img src="/favicon/favicon.svg" alt="BetCrash" width="30" height="30"></div>
     <div class="brand-name">Bet<span>Crash</span> <span style="color:var(--text-mid);font-weight:500;font-size:12px;">Admin</span></div>
   </div>
   <div class="role-pill">

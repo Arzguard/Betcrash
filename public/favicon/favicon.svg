@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="BetCrash">
+  <defs>
+    <linearGradient id="bc-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#16123A"/>
+      <stop offset="1" stop-color="#211B55"/>
+    </linearGradient>
+    <linearGradient id="bc-bar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4E3DAF"/>
+      <stop offset="1" stop-color="#6B5BEA"/>
+    </linearGradient>
+    <filter id="bc-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect x="2" y="2" width="96" height="96" rx="24" fill="#38F29F" opacity="0.18" filter="url(#bc-glow)"/>
+  <rect x="4" y="4" width="92" height="92" rx="22" fill="url(#bc-bg)" stroke="#39327E" stroke-width="1.5"/>
+  <g fill="url(#bc-bar)" opacity="0.5">
+    <rect x="14" y="58" width="5" height="22"/>
+    <rect x="22" y="54" width="5" height="26"/>
+    <rect x="30" y="48" width="5" height="32"/>
+    <rect x="38" y="42" width="5" height="38"/>
+  </g>
+  <path d="M 48,62 C 56,54 68,42 76,30" stroke="#38F29F" stroke-width="7" fill="none" opacity="0.12" stroke-linecap="round"/>
+  <path d="M 48,62 C 56,54 68,42 76,30" stroke="#38F29F" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 76,30 L 80,27 L 73,28 L 76,32 Z" fill="#38F29F"/>
+  <polygon points="48,58 49,61 52,62 49,63 48,66 47,63 44,62 47,61" fill="#FFD24A"/>
+  <g transform="translate(50,46) rotate(20)">
+    <path d="M -24,0 L -18,-2 L -10,-3 L 0,-4 L 10,-3 L 18,-2 L 22,0 L 18,2 L 10,3 L 0,4 L -10,3 L -18,2 Z" fill="#38F29F"/>
+    <path d="M 8,-3 L 14,-11 L 24,-6 L 18,0 Z" fill="#38F29F"/>
+    <path d="M 8,3 L 14,11 L 24,6 L 18,0 Z" fill="#38F29F"/>
+    <path d="M -18,-2 L -22,-10 L -14,-2 Z" fill="#38F29F"/>
+    <g stroke="#38F29F" stroke-width="2.5" opacity="0.5" stroke-linecap="round">
+      <line x1="-26" y1="-1" x2="-34" y2="-3"/>
+      <line x1="-26" y1="0" x2="-36" y2="0"/>
+      <line x1="-26" y1="1" x2="-34" y2="3"/>
+    </g>
+  </g>
+</svg>
