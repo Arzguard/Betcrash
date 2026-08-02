@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BetCrash — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void: #0E0C2B;
+    --panel: #17144A;
+    --panel-raised: #201C5C;
+    --panel-line: #2C2870;
+    --green: #33E28A;
+    --green-dim: rgba(51,226,138,0.14);
+    --yellow: #FFD23F;
+    --yellow-dim: rgba(255,210,63,0.13);
+    --red: #FF5C6C;
+    --red-dim: rgba(255,92,108,0.14);
+    --text-hi: #F5F4FF;
+    --text-mid: #9C98CC;
+    --text-low: #625E96;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(120% 140% at 100% -10%, #211D63 0%, var(--void) 55%);
+    color:var(--text-hi);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    display:flex;
+  }
+  ::selection{background:var(--yellow);color:var(--void);}
+  a{color:inherit;text-decoration:none;}
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    width:230px;flex:0 0 230px;
+    background:rgba(23,20,74,0.6);
+    border-right:1px solid var(--panel-line);
+    display:flex;flex-direction:column;
+    padding:18px 14px;
+    position:sticky;top:0;height:100vh;
+  }
+  .brand{display:flex;align-items:center;gap:10px;padding:0 6px 20px;}
+  .brand-mark{
+    width:28px;height:28px;border-radius:8px;
+    background:conic-gradient(from 220deg, var(--green), var(--yellow), var(--green));
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Space Grotesk';font-weight:700;color:var(--void);font-size:14px;
+  }
+  .brand-name{font-family:'Space Grotesk';font-weight:700;font-size:15.5px;}
+  .brand-name span{color:var(--yellow);}
+  .role-pill{
+    margin:0 6px 18px;padding:7px 10px;border-radius:9px;
+    background:var(--panel);border:1px solid var(--panel-line);
+    font-size:11px;color:var(--text-mid);display:flex;align-items:center;justify-content:space-between;
+  }
+  .role-pill b{color:var(--text-hi);font-weight:600;}
+  .role-pill .badge{
+    background:var(--green-dim);color:var(--green);padding:2px 7px;border-radius:99px;
+    font-size:9.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;
+  }
+  .nav-group{margin-bottom:16px;}
+  .nav-label{
+    font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-low);
+    padding:0 10px;margin-bottom:6px;font-weight:600;
+  }
+  .nav-item{
+    display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;
+    font-size:13px;color:var(--text-mid);cursor:pointer;font-weight:500;
+  }
+  .nav-item:hover{color:var(--text-hi);background:var(--panel);}
+  .nav-item.active{background:var(--panel-raised);color:var(--text-hi);}
+  .nav-item .dot{width:6px;height:6px;border-radius:50%;background:var(--panel-line);}
+  .nav-item.active .dot{background:var(--green);box-shadow:0 0 6px var(--green);}
+  .nav-item .count{
+    margin-left:auto;background:var(--red-dim);color:var(--red);font-size:10px;font-weight:700;
+    padding:1px 6px;border-radius:99px;font-family:'JetBrains Mono';
+  }
+  .sidebar-foot{margin-top:auto;padding:10px 6px 0;border-top:1px solid var(--panel-line);}
+  .admin-chip{display:flex;align-items:center;gap:9px;padding-top:12px;}
+  .admin-chip .av{width:30px;height:30px;border-radius:8px;background:var(--panel-raised);border:1px solid var(--panel-line);}
+  .admin-chip .who{font-size:12.5px;font-weight:600;}
+  .admin-chip .role{font-size:10.5px;color:var(--text-mid);}
+
+  /* ---------- Main ---------- */
+  .main{flex:1;min-width:0;padding:20px 26px 40px;}
+  .topline{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+  .topline h1{font-family:'Space Grotesk';font-size:21px;margin:0;font-weight:700;}
+  .topline .sub{font-size:12.5px;color:var(--text-mid);margin-top:3px;}
+  .top-actions{display:flex;gap:10px;align-items:center;}
+  .live-round-pill{
+    display:flex;align-items:center;gap:8px;background:var(--green-dim);border:1px solid rgba(51,226,138,0.3);
+    padding:8px 14px;border-radius:99px;font-family:'JetBrains Mono';font-size:12.5px;color:var(--green);font-weight:600;
+  }
+  .live-round-pill .status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);}
+  .btn-primary{
+    background:var(--yellow);color:#3B2900;border:none;padding:9px 16px;border-radius:9px;
+    font-family:'Space Grotesk';font-weight:700;font-size:12.5px;cursor:pointer;
+  }
+
+  /* ---------- Stat grid ---------- */
+  .stat-grid{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px;
+  }
+  @media (max-width:1100px){ .stat-grid{grid-template-columns:repeat(2,1fr);} }
+  .stat-card{
+    background:var(--panel);border:1px solid var(--panel-line);border-radius:14px;padding:16px;
+    position:relative;overflow:hidden;
+  }
+  .stat-card .label{font-size:11px;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;}
+  .stat-card .value{font-family:'Space Grotesk';font-size:26px;font-weight:700;margin-top:8px;}
+  .stat-card .delta{font-family:'JetBrains Mono';font-size:11.5px;margin-top:6px;display:flex;align-items:center;gap:5px;}
+  .delta.up{color:var(--green);}
+  .delta.down{color:var(--red);}
+  .stat-card.accent-green{border-color:rgba(51,226,138,0.35);}
+  .stat-card.accent-yellow{border-color:rgba(255,210,63,0.35);}
+  .stat-card.accent-red{border-color:rgba(255,92,108,0.35);}
+  .spark{position:absolute;bottom:0;left:0;right:0;height:36px;opacity:0.55;}
+
+  /* ---------- Content grid ---------- */
+  .content-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-bottom:14px;}
+  @media (max-width:1100px){ .content-grid{grid-template-columns:1fr;} }
+  .panel{
+    background:var(--panel);border:1px solid var(--panel-line);border-radius:14px;padding:18px;
+  }
+  .panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .panel-head h3{font-family:'Space Grotesk';font-size:14.5px;margin:0;font-weight:700;}
+  .panel-head .tabs{display:flex;gap:6px;}
+  .panel-head .tabs button{
+    background:var(--panel-raised);border:1px solid var(--panel-line);color:var(--text-mid);
+    font-size:11px;padding:5px 10px;border-radius:7px;cursor:pointer;font-family:'JetBrains Mono';
+  }
+  .panel-head .tabs button.active{color:var(--text-hi);border-color:var(--green);}
+
+  .ggr-value{font-family:'JetBrains Mono';font-size:13px;color:var(--text-mid);margin-bottom:10px;}
+  .ggr-value b{color:var(--green);font-size:15px;}
+
+  /* live rounds monitor list */
+  .round-row{
+    display:grid;grid-template-columns:70px 1fr 90px 90px 80px;align-items:center;gap:8px;
+    padding:9px 0;border-bottom:1px solid var(--panel-line);
+    font-family:'JetBrains Mono';font-size:12px;
+  }
+  .round-row:last-child{border-bottom:none;}
+  .round-row.head{color:var(--text-low);font-size:10.5px;text-transform:uppercase;letter-spacing:0.05em;}
+  .round-row .rid{color:var(--text-mid);}
+  .round-row .bar-wrap{background:var(--void);border-radius:5px;height:6px;overflow:hidden;}
+  .round-row .bar{height:100%;background:var(--green);}
+  .round-row .mult{font-weight:700;}
+  .round-row .mult.crashed{color:var(--red);}
+  .round-row .mult.live{color:var(--green);}
+  .status-badge{font-size:10px;padding:2px 8px;border-radius:99px;font-weight:700;text-align:center;}
+  .status-badge.live{background:var(--green-dim);color:var(--green);}
+  .status-badge.crashed{background:var(--red-dim);color:var(--red);}
+
+  /* activity / audit log */
+  .log-row{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--panel-line);align-items:flex-start;}
+  .log-row:last-child{border-bottom:none;}
+  .log-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex:0 0 auto;}
+  .log-dot.finance{background:var(--yellow);}
+  .log-dot.security{background:var(--red);}
+  .log-dot.user{background:var(--green);}
+  .log-body{font-size:12.5px;line-height:1.4;}
+  .log-body b{font-weight:600;}
+  .log-time{font-size:10.5px;color:var(--text-low);margin-top:2px;font-family:'JetBrains Mono';}
+
+  /* queue table */
+  .table{width:100%;border-collapse:collapse;}
+  .table th{
+    text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-low);
+    padding:0 10px 8px;font-weight:600;
+  }
+  .table td{padding:10px;font-size:12.5px;border-top:1px solid var(--panel-line);}
+  .table tr td:first-child, .table th:first-child{padding-left:14px;}
+  .table .user-cell{display:flex;align-items:center;gap:9px;}
+  .table .av-sm{width:26px;height:26px;border-radius:7px;background:var(--panel-raised);border:1px solid var(--panel-line);}
+  .table .amt{font-family:'JetBrains Mono';font-weight:700;}
+  .table .amt.out{color:var(--yellow);}
+  .table .amt.in{color:var(--green);}
+  .row-actions{display:flex;gap:6px;}
+  .row-actions button{
+    border:1px solid var(--panel-line);background:var(--panel-raised);color:var(--text-mid);
+    font-size:11px;padding:5px 10px;border-radius:7px;cursor:pointer;font-family:'Space Grotesk';font-weight:600;
+  }
+  .row-actions button.approve{color:var(--green);border-color:rgba(51,226,138,0.35);}
+  .row-actions button.deny{color:var(--red);border-color:rgba(255,92,108,0.35);}
+
+  .risk-flag{font-size:10px;padding:2px 7px;border-radius:6px;font-weight:700;}
+  .risk-flag.low{background:var(--green-dim);color:var(--green);}
+  .risk-flag.med{background:var(--yellow-dim);color:var(--yellow);}
+  .risk-flag.high{background:var(--red-dim);color:var(--red);}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="brand">
+    <div class="brand-mark">B</div>
+    <div class="brand-name">Bet<span>Crash</span> <span style="color:var(--text-mid);font-weight:500;font-size:12px;">Admin</span></div>
+  </div>
+  <div class="role-pill">
+    <span>Signed in as <b>Super Admin</b></span>
+    <span class="badge">RBAC</span>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-label">Overview</div>
+    <div class="nav-item active"><span class="dot"></span>Dashboard</div>
+    <div class="nav-item"><span class="dot"></span>Analytics</div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Operations</div>
+    <div class="nav-item"><span class="dot"></span>Live betting</div>
+    <div class="nav-item"><span class="dot"></span>Users<span class="count">6</span></div>
+    <div class="nav-item"><span class="dot"></span>Wallets & payouts<span class="count">14</span></div>
+    <div class="nav-item"><span class="dot"></span>KYC queue<span class="count">9</span></div>
+    <div class="nav-item"><span class="dot"></span>Fraud & risk</div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Platform</div>
+    <div class="nav-item"><span class="dot"></span>Promotions</div>
+    <div class="nav-item"><span class="dot"></span>Notifications</div>
+    <div class="nav-item"><span class="dot"></span>CMS</div>
+    <div class="nav-item"><span class="dot"></span>Staff & roles</div>
+    <div class="nav-item"><span class="dot"></span>Audit logs</div>
+  </div>
+
+  <div class="sidebar-foot">
+    <div class="admin-chip">
+      <div class="av"></div>
+      <div>
+        <div class="who">N. Kariuki</div>
+        <div class="role">Super Admin</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topline">
+    <div>
+      <h1>Dashboard</h1>
+      <div class="sub">Sunday, 2 August 2026 · last updated just now</div>
+    </div>
+    <div class="top-actions">
+      <div class="live-round-pill"><span class="status-dot"></span>Round #10483 live · 2.14x</div>
+      <button class="btn-primary">Export report</button>
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card accent-green">
+      <div class="label">Users online</div>
+      <div class="value" id="statOnline">1,284</div>
+      <div class="delta up">▲ 6.2% vs yesterday</div>
+    </div>
+    <div class="stat-card accent-yellow">
+      <div class="label">GGR today</div>
+      <div class="value">KES 842,300</div>
+      <div class="delta up">▲ 11.4% vs yesterday</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Deposits today</div>
+      <div class="value">KES 3.1M</div>
+      <div class="delta up">▲ 3.8%</div>
+    </div>
+    <div class="stat-card accent-red">
+      <div class="label">Pending withdrawals</div>
+      <div class="value">47</div>
+      <div class="delta down">▼ needs review</div>
+    </div>
+  </div>
+
+  <div class="content-grid">
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Live betting rounds</h3>
+        <div class="tabs">
+          <button class="active">Live</button>
+          <button>History</button>
+        </div>
+      </div>
+      <div class="ggr-value">Current round bets: <b>KES 218,400</b> · 231 active players</div>
+      <div class="round-row head">
+        <div>Round</div><div>Progress</div><div>Multiplier</div><div>Bets</div><div>Status</div>
+      </div>
+      <div id="roundsList"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Recent activity</h3>
+      </div>
+      <div id="activityList"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h3>Withdrawal approval queue</h3>
+      <div class="tabs">
+        <button class="active">Pending (5)</button>
+        <button>Approved</button>
+        <button>Denied</button>
+      </div>
+    </div>
+    <table class="table">
+      <thead>
+        <tr><th>User</th><th>Amount</th><th>Method</th><th>Risk</th><th>Requested</th><th></th></tr>
+      </thead>
+      <tbody id="queueBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+// ---- Live rounds monitor ----
+const rounds=[
+  {id:10483, mult:2.14, live:true, bets:'218,400', pct:38},
+  {id:10482, mult:14.20, live:false, bets:'96,200', pct:100},
+  {id:10481, mult:1.11, live:false, bets:'142,850', pct:100},
+  {id:10480, mult:4.05, live:false, bets:'178,300', pct:100},
+];
+document.getElementById('roundsList').innerHTML = rounds.map(r=>`
+  <div class="round-row">
+    <div class="rid">#${r.id}</div>
+    <div class="bar-wrap"><div class="bar" style="width:${r.pct}%;background:${r.live?'var(--green)':'var(--panel-line)'}"></div></div>
+    <div class="mult ${r.live?'live':'crashed'}">${r.mult.toFixed(2)}x</div>
+    <div>KES ${r.bets}</div>
+    <div><span class="status-badge ${r.live?'live':'crashed'}">${r.live?'Live':'Crashed'}</span></div>
+  </div>
+`).join('');
+
+// ---- Activity feed ----
+const activity=[
+  {type:'security', text:'<b>A. Mwangi</b> failed login 4x — account auto-locked', time:'2 min ago'},
+  {type:'finance', text:'Withdrawal of <b>KES 40,000</b> approved by <b>Finance Admin</b>', time:'6 min ago'},
+  {type:'user', text:'<b>247 new registrations</b> in the last hour', time:'11 min ago'},
+  {type:'finance', text:'Suspicious transaction flagged for user <b>#88213</b>', time:'18 min ago'},
+  {type:'user', text:'KYC approved for <b>J. Kimani</b>', time:'24 min ago'},
+  {type:'security', text:'Config change: max bet limit updated to <b>KES 50,000</b>', time:'41 min ago'},
+];
+document.getElementById('activityList').innerHTML = activity.map(a=>`
+  <div class="log-row">
+    <div class="log-dot ${a.type}"></div>
+    <div>
+      <div class="log-body">${a.text}</div>
+      <div class="log-time">${a.time}</div>
+    </div>
+  </div>
+`).join('');
+
+// ---- Withdrawal queue ----
+const queue=[
+  {name:'D. Achieng', amt:12000, method:'M-Pesa', risk:'low', time:'3 min ago'},
+  {name:'S. Barasa', amt:85000, method:'M-Pesa', risk:'high', time:'9 min ago'},
+  {name:'P. Mburu', amt:5000, method:'M-Pesa', risk:'low', time:'15 min ago'},
+  {name:'W. Cheruiyot', amt:150000, method:'Bank transfer', risk:'high', time:'22 min ago'},
+  {name:'F. Njeri', amt:22000, method:'M-Pesa', risk:'med', time:'34 min ago'},
+];
+document.getElementById('queueBody').innerHTML = queue.map(q=>`
+  <tr>
+    <td class="user-cell"><div class="av-sm"></div>${q.name}</td>
+    <td class="amt out">KES ${q.amt.toLocaleString()}</td>
+    <td>${q.method}</td>
+    <td><span class="risk-flag ${q.risk}">${q.risk.toUpperCase()}</span></td>
+    <td>${q.time}</td>
+    <td><div class="row-actions"><button class="approve">Approve</button><button class="deny">Deny</button></div></td>
+  </tr>
+`).join('');
+
+// ---- Live tick for online users + round pill ----
+let online=1284;
+setInterval(()=>{
+  online += Math.round((Math.random()-0.4)*6);
+  document.getElementById('statOnline').textContent = online.toLocaleString();
+}, 2200);
+</script>
+</body>
+</html>

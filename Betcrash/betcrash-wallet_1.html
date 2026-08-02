@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BetCrash — Wallet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0E0C2B; --panel:#17144A; --panel-raised:#201C5C; --panel-line:#2C2870;
+    --green:#33E28A; --green-dim:rgba(51,226,138,0.14);
+    --yellow:#FFD23F; --yellow-dim:rgba(255,210,63,0.13);
+    --red:#FF5C6C; --red-dim:rgba(255,92,108,0.14);
+    --text-hi:#F5F4FF; --text-mid:#9C98CC; --text-low:#625E96;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:radial-gradient(120% 140% at 15% -10%, #211D63 0%, var(--void) 55%);color:var(--text-hi);font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+  ::selection{background:var(--yellow);color:var(--void);}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;border-bottom:1px solid var(--panel-line);background:rgba(14,12,43,0.7);backdrop-filter:blur(6px);position:sticky;top:0;z-index:20;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-mark{width:30px;height:30px;border-radius:8px;background:conic-gradient(from 220deg, var(--green), var(--yellow), var(--green));display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-weight:700;color:var(--void);font-size:15px;}
+  .brand-name{font-family:'Space Grotesk';font-weight:700;font-size:17px;}
+  .brand-name span{color:var(--yellow);}
+  .avatar{width:32px;height:32px;border-radius:9px;background:var(--panel-raised);border:1px solid var(--panel-line);}
+
+  .layout{max-width:1080px;margin:0 auto;width:100%;padding:22px 22px 60px;}
+  .topline{margin-bottom:18px;}
+  .topline h1{font-family:'Space Grotesk';font-size:21px;margin:0;font-weight:700;}
+  .topline .sub{font-size:12.5px;color:var(--text-mid);margin-top:3px;}
+
+  /* balance cards */
+  .balance-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:14px;margin-bottom:20px;}
+  @media (max-width:760px){ .balance-grid{grid-template-columns:1fr;} }
+  .balance-card{background:var(--panel);border:1px solid var(--panel-line);border-radius:16px;padding:20px;position:relative;overflow:hidden;}
+  .balance-card.main{border-color:rgba(51,226,138,0.35);}
+  .balance-card .label{font-size:11px;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.07em;font-weight:600;}
+  .balance-card .value{font-family:'Space Grotesk';font-size:30px;font-weight:700;margin-top:8px;}
+  .balance-card.main .value{color:var(--green);}
+  .balance-card .foot{font-size:11.5px;color:var(--text-low);margin-top:8px;font-family:'JetBrains Mono';}
+  .balance-card .glow{position:absolute;width:140px;height:140px;background:var(--green);opacity:0.08;border-radius:50%;top:-60px;right:-40px;filter:blur(10px);}
+
+  /* tabs */
+  .tabs{display:flex;background:var(--panel);border:1px solid var(--panel-line);border-radius:12px;padding:4px;margin-bottom:16px;max-width:340px;}
+  .tabs button{flex:1;padding:10px;border:none;background:transparent;color:var(--text-mid);font-family:'Space Grotesk';font-weight:600;font-size:13px;border-radius:9px;cursor:pointer;}
+  .tabs button.active{background:var(--panel-raised);color:var(--text-hi);}
+
+  .content-grid{display:grid;grid-template-columns:380px 1fr;gap:16px;}
+  @media (max-width:900px){ .content-grid{grid-template-columns:1fr;} }
+
+  .panel{background:var(--panel);border:1px solid var(--panel-line);border-radius:16px;padding:20px;}
+  .panel h3{font-family:'Space Grotesk';font-size:14.5px;margin:0 0 14px;font-weight:700;}
+
+  label{font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-mid);font-weight:600;display:block;margin-bottom:6px;}
+  .field{margin-bottom:14px;}
+  .amount-row{display:flex;align-items:center;background:var(--void);border:1px solid var(--panel-line);border-radius:10px;overflow:hidden;}
+  .amount-row .prefix{padding:0 0 0 12px;color:var(--text-mid);font-family:'JetBrains Mono';font-size:14px;}
+  .amount-row input{flex:1;background:transparent;border:none;color:var(--text-hi);font-family:'JetBrains Mono';font-weight:700;font-size:17px;padding:11px 12px;outline:none;width:0;}
+  input.phone-input{width:100%;background:var(--void);border:1px solid var(--panel-line);border-radius:10px;padding:11px 12px;color:var(--text-hi);font-family:'JetBrains Mono';font-size:14px;outline:none;}
+  .quick-amts{display:flex;gap:6px;margin-bottom:14px;}
+  .quick-amts button{flex:1;background:var(--panel-raised);border:1px solid var(--panel-line);color:var(--text-mid);border-radius:8px;padding:8px 0;font-family:'JetBrains Mono';font-size:12px;cursor:pointer;}
+  .quick-amts button:hover{color:var(--text-hi);border-color:var(--green);}
+
+  .hint{font-size:11.5px;color:var(--text-low);margin-top:5px;}
+  .hint.err{color:var(--red);}
+
+  .btn{width:100%;padding:13px;border:none;border-radius:10px;font-family:'Space Grotesk';font-weight:700;font-size:14.5px;cursor:pointer;margin-top:4px;}
+  .btn.deposit{background:var(--green);color:#062616;}
+  .btn.withdraw{background:var(--yellow);color:#3B2900;}
+  .btn:disabled{background:var(--panel-raised);color:var(--text-low);cursor:not-allowed;}
+
+  .mpesa-badge{display:flex;align-items:center;gap:8px;background:var(--void);border:1px solid var(--panel-line);border-radius:9px;padding:9px 12px;margin-bottom:14px;font-size:12px;color:var(--text-mid);}
+  .mpesa-dot{width:8px;height:8px;border-radius:2px;background:var(--green);}
+
+  /* stk push state */
+  .stk-status{text-align:center;padding:16px 4px 4px;}
+  .stk-icon{width:56px;height:56px;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+  .stk-icon.wait{background:var(--yellow-dim);color:var(--yellow);}
+  .stk-icon.ok{background:var(--green-dim);color:var(--green);}
+  .stk-title{font-family:'Space Grotesk';font-weight:700;font-size:15px;margin-bottom:6px;}
+  .stk-desc{font-size:12.5px;color:var(--text-mid);line-height:1.5;margin-bottom:16px;}
+  .pulse{animation:pulse 1.4s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+
+  /* transactions */
+  .tx-filters{display:flex;gap:6px;margin-bottom:12px;}
+  .tx-filters button{background:var(--panel-raised);border:1px solid var(--panel-line);color:var(--text-mid);border-radius:8px;padding:6px 12px;font-size:11.5px;font-family:'JetBrains Mono';cursor:pointer;}
+  .tx-filters button.active{color:var(--text-hi);border-color:var(--green);}
+  .tx-row{display:grid;grid-template-columns:34px 1fr auto auto;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--panel-line);}
+  .tx-row:last-child{border-bottom:none;}
+  .tx-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;flex:0 0 auto;}
+  .tx-icon.deposit{background:var(--green-dim);color:var(--green);}
+  .tx-icon.withdraw{background:var(--yellow-dim);color:var(--yellow);}
+  .tx-icon.win{background:var(--green-dim);color:var(--green);}
+  .tx-icon.loss{background:var(--red-dim);color:var(--red);}
+  .tx-icon.bonus{background:var(--yellow-dim);color:var(--yellow);}
+  .tx-main .title{font-size:13px;font-weight:600;}
+  .tx-main .sub{font-size:11px;color:var(--text-low);font-family:'JetBrains Mono';margin-top:2px;}
+  .tx-amt{font-family:'JetBrains Mono';font-weight:700;font-size:13.5px;text-align:right;}
+  .tx-amt.pos{color:var(--green);}
+  .tx-amt.neg{color:var(--text-mid);}
+  .tx-status{font-size:10px;padding:2px 8px;border-radius:99px;font-weight:700;text-transform:uppercase;justify-self:end;}
+  .tx-status.completed{background:var(--green-dim);color:var(--green);}
+  .tx-status.pending{background:var(--yellow-dim);color:var(--yellow);}
+  .tx-status.failed{background:var(--red-dim);color:var(--red);}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--panel-raised);border:1px solid var(--green);color:var(--text-hi);padding:12px 20px;border-radius:10px;font-size:13px;font-family:'Space Grotesk';font-weight:600;opacity:0;transition:all .25s ease;display:flex;align-items:center;gap:8px;z-index:30;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast .dot{width:7px;height:7px;border-radius:50%;background:var(--green);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><div class="brand-mark">B</div><div class="brand-name">Bet<span>Crash</span></div></div>
+  <div class="avatar"></div>
+</div>
+
+<div class="layout">
+  <div class="topline">
+    <h1>Wallet</h1>
+    <div class="sub">Deposit, withdraw, and track every transaction on your account</div>
+  </div>
+
+  <div class="balance-grid">
+    <div class="balance-card main">
+      <div class="glow"></div>
+      <div class="label">Main balance</div>
+      <div class="value" id="mainBal">KES 12,450</div>
+      <div class="foot">Available to bet or withdraw</div>
+    </div>
+    <div class="balance-card">
+      <div class="label">Bonus balance</div>
+      <div class="value" style="color:var(--yellow);font-size:24px;" id="bonusBal">KES 500</div>
+      <div class="foot">Wagering: 2,100 / 5,000 KES</div>
+    </div>
+    <div class="balance-card">
+      <div class="label">Pending</div>
+      <div class="value" style="font-size:24px;color:var(--text-mid);" id="pendingBal">KES 15,000</div>
+      <div class="foot">1 withdrawal in review (over KES 10,000)</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="active" id="tabDeposit">Deposit</button>
+    <button id="tabWithdraw">Withdraw</button>
+  </div>
+
+  <div class="content-grid">
+    <div class="panel" id="actionPanel"></div>
+
+    <div class="panel">
+      <h3>Transaction history</h3>
+      <div class="tx-filters">
+        <button class="active" data-f="all">All</button>
+        <button data-f="deposit">Deposits</button>
+        <button data-f="withdraw">Withdrawals</button>
+        <button data-f="bet">Betting</button>
+      </div>
+      <div id="txList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span class="dot"></span><span id="toastText"></span></div>
+
+<script>
+let wallet=12450;
+let currentTab='deposit';
+let mpesaPhone='0712 345 678';
+
+// tiered withdrawal policy
+const AUTO_APPROVE_LIMIT=10000;
+const user={ kycVerified:true, accountAgeDays:64, riskFlagged:false };
+
+const transactions=[
+  {type:'deposit', title:'M-Pesa deposit', sub:'Ref MPE7X92KL1', amt:2000, status:'completed', time:'Today, 14:22'},
+  {type:'bet', win:true, title:'Cashed out at 3.42x', sub:'Round #10481', amt:684, status:'completed', time:'Today, 13:58'},
+  {type:'bet', win:false, title:'Round crashed at 1.08x', sub:'Round #10479', amt:-200, status:'completed', time:'Today, 13:41'},
+  {type:'withdraw', title:'Withdrawal to M-Pesa', sub:'Ref MPE7X88NQ4', amt:-15000, status:'pending', time:'Today, 12:15'},
+  {type:'withdraw', title:'Withdrawal to M-Pesa', sub:'Ref MPE7X61FR2', amt:-3200, status:'completed', time:'Today, 09:40'},
+  {type:'bonus', title:'Welcome bonus credited', sub:'Wagering requirement applies', amt:500, status:'completed', time:'Yesterday, 19:04'},
+  {type:'deposit', title:'M-Pesa deposit', sub:'Ref MPE7W41TZ9', amt:5000, status:'completed', time:'Yesterday, 18:50'},
+  {type:'withdraw', title:'Withdrawal to M-Pesa', sub:'Ref MPE7V02BC3', amt:-1500, status:'failed', time:'2 days ago'},
+];
+
+function fmt(n){ return (n<0?'-':'') + 'KES ' + Math.abs(Math.round(n)).toLocaleString(); }
+
+function renderTx(filter='all'){
+  const el=document.getElementById('txList');
+  const icons={deposit:'↓',withdraw:'↑',win:'▲',loss:'▼',bonus:'★'};
+  const filtered=transactions.filter(t=>{
+    if(filter==='all') return true;
+    if(filter==='bet') return t.type==='bet';
+    return t.type===filter;
+  });
+  el.innerHTML=filtered.map(t=>{
+    const iconClass = t.type==='bet' ? (t.win?'win':'loss') : t.type;
+    const icon = t.type==='bet' ? (t.win?icons.win:icons.loss) : icons[t.type];
+    return `
+    <div class="tx-row">
+      <div class="tx-icon ${iconClass}">${icon}</div>
+      <div class="tx-main"><div class="title">${t.title}</div><div class="sub">${t.sub} · ${t.time}</div></div>
+      <div class="tx-amt ${t.amt>0?'pos':'neg'}">${fmt(t.amt)}</div>
+      <div class="tx-status ${t.status}">${t.status}</div>
+    </div>`;
+  }).join('');
+}
+renderTx();
+
+document.querySelectorAll('.tx-filters button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.tx-filters button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    renderTx(b.dataset.f);
+  });
+});
+
+function showToast(text){
+  const t=document.getElementById('toast');
+  document.getElementById('toastText').textContent=text;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+// ---------- Deposit panel ----------
+function depositView(){
+  return `
+    <h3>Deposit via M-Pesa</h3>
+    <div class="mpesa-badge"><span class="mpesa-dot"></span>STK Push · funds credited automatically</div>
+    <div class="field">
+      <label>Amount</label>
+      <div class="amount-row"><span class="prefix">KES</span><input id="depAmt" value="500" inputmode="numeric"></div>
+    </div>
+    <div class="quick-amts">
+      <button data-v="200">200</button><button data-v="500">500</button>
+      <button data-v="1000">1,000</button><button data-v="5000">5,000</button>
+    </div>
+    <div class="field">
+      <label>M-Pesa number</label>
+      <input class="phone-input" id="depPhone" value="${mpesaPhone}">
+      <div class="hint">You'll receive an STK push prompt on this number</div>
+    </div>
+    <button class="btn deposit" id="depBtn">Send STK push</button>
+  `;
+}
+
+function bindDeposit(){
+  const amt=document.getElementById('depAmt');
+  document.querySelectorAll('.quick-amts button').forEach(b=>{
+    b.addEventListener('click',()=>{ amt.value=b.dataset.v; });
+  });
+  document.getElementById('depBtn').addEventListener('click',()=>{
+    const value=parseInt(amt.value)||0;
+    const phone=document.getElementById('depPhone').value;
+    if(value<50){ showToast('Minimum deposit is KES 50'); return; }
+    runStkFlow(value, phone);
+  });
+}
+
+function runStkFlow(amount, phone){
+  const panel=document.getElementById('actionPanel');
+  panel.innerHTML = `
+    <div class="stk-status">
+      <div class="stk-icon wait pulse">📲</div>
+      <div class="stk-title">Check your phone</div>
+      <div class="stk-desc">We've sent an M-Pesa prompt to <b style="color:var(--text-hi)">${phone}</b> for <b style="color:var(--text-hi)">${fmt(amount)}</b>. Enter your M-Pesa PIN to complete the deposit.</div>
+    </div>
+  `;
+  setTimeout(()=>{
+    wallet += amount;
+    document.getElementById('mainBal').textContent = fmt(wallet);
+    transactions.unshift({type:'deposit', title:'M-Pesa deposit', sub:'Ref MPE'+Math.random().toString(36).slice(2,9).toUpperCase(), amt:amount, status:'completed', time:'Just now'});
+    renderTx(document.querySelector('.tx-filters button.active').dataset.f);
+    panel.innerHTML = `
+      <div class="stk-status">
+        <div class="stk-icon ok">✓</div>
+        <div class="stk-title">Deposit successful</div>
+        <div class="stk-desc">${fmt(amount)} has been added to your wallet and is ready to bet with.</div>
+        <button class="btn deposit" id="depAgainBtn">Make another deposit</button>
+      </div>
+    `;
+    document.getElementById('depAgainBtn').addEventListener('click', renderPanel);
+    showToast(`Deposit confirmed — ${fmt(amount)} added to wallet`);
+  }, 2600);
+}
+
+// ---------- Withdraw panel ----------
+function withdrawView(){
+  return `
+    <h3>Withdraw to M-Pesa</h3>
+    <div class="mpesa-badge"><span class="mpesa-dot"></span>Under ${fmt(AUTO_APPROVE_LIMIT)} · verified account → instant payout</div>
+    <div class="field">
+      <label>Amount</label>
+      <div class="amount-row"><span class="prefix">KES</span><input id="wdAmt" value="1000" inputmode="numeric"></div>
+      <div class="hint" id="wdHint">Available: ${fmt(wallet)}</div>
+    </div>
+    <div class="quick-amts">
+      <button data-v="500">500</button><button data-v="1000">1,000</button>
+      <button data-v="2000">2,000</button><button data-v="max">Max</button>
+    </div>
+    <div class="field">
+      <label>M-Pesa number</label>
+      <input class="phone-input" id="wdPhone" value="${mpesaPhone}" disabled style="opacity:0.7;">
+      <div class="hint">Withdrawals go to your verified number only, for security</div>
+    </div>
+    <div id="tierNote" style="font-size:11.5px;color:var(--text-low);margin-bottom:10px;font-family:'JetBrains Mono';"></div>
+    <button class="btn withdraw" id="wdBtn">Request withdrawal</button>
+  `;
+}
+
+function bindWithdraw(){
+  const amt=document.getElementById('wdAmt');
+  const hint=document.getElementById('wdHint');
+  const tierNote=document.getElementById('tierNote');
+  document.querySelectorAll('.quick-amts button').forEach(b=>{
+    b.addEventListener('click',()=>{ amt.value = b.dataset.v==='max' ? wallet : b.dataset.v; validate(); });
+  });
+  function willAutoApprove(v){
+    return v<=AUTO_APPROVE_LIMIT && user.kycVerified && !user.riskFlagged;
+  }
+  function validate(){
+    const v=parseInt(amt.value)||0;
+    if(v>wallet){ hint.className='hint err'; hint.textContent='Exceeds available balance of '+fmt(wallet); document.getElementById('wdBtn').disabled=true; tierNote.textContent=''; return; }
+    if(v<100){ hint.className='hint err'; hint.textContent='Minimum withdrawal is KES 100'; document.getElementById('wdBtn').disabled=true; tierNote.textContent=''; return; }
+    hint.className='hint'; hint.textContent='Available: '+fmt(wallet);
+    document.getElementById('wdBtn').disabled=false;
+    if(willAutoApprove(v)){
+      tierNote.innerHTML='<span style="color:var(--green);">●</span> Instant — under the '+fmt(AUTO_APPROVE_LIMIT)+' auto-approve limit';
+    } else {
+      tierNote.innerHTML='<span style="color:var(--yellow);">●</span> Held for admin review — over the '+fmt(AUTO_APPROVE_LIMIT)+' instant limit';
+    }
+  }
+  amt.addEventListener('input', validate);
+  validate();
+  document.getElementById('wdBtn').addEventListener('click',()=>{
+    const value=parseInt(amt.value)||0;
+    const instant=willAutoApprove(value);
+    wallet-=value;
+    document.getElementById('mainBal').textContent=fmt(wallet);
+    transactions.unshift({type:'withdraw', title:'Withdrawal to M-Pesa', sub:'Ref MPE'+Math.random().toString(36).slice(2,9).toUpperCase(), amt:-value, status: instant?'completed':'pending', time:'Just now'});
+    renderTx(document.querySelector('.tx-filters button.active').dataset.f);
+    const panel=document.getElementById('actionPanel');
+
+    if(instant){
+      panel.innerHTML = `
+        <div class="stk-status">
+          <div class="stk-icon wait pulse">📤</div>
+          <div class="stk-title">Sending to M-Pesa…</div>
+          <div class="stk-desc">${fmt(value)} is being sent to <b style="color:var(--text-hi)">${mpesaPhone}</b>.</div>
+        </div>
+      `;
+      setTimeout(()=>{
+        panel.innerHTML = `
+          <div class="stk-status">
+            <div class="stk-icon ok">✓</div>
+            <div class="stk-title">Withdrawal sent</div>
+            <div class="stk-desc">${fmt(value)} has landed on <b style="color:var(--text-hi)">${mpesaPhone}</b>. Under the instant limit, so no review was needed.</div>
+            <button class="btn withdraw" id="wdAgainBtn">Back to wallet</button>
+          </div>
+        `;
+        document.getElementById('wdAgainBtn').addEventListener('click', renderPanel);
+        showToast(`Withdrawal complete — ${fmt(value)} sent instantly`);
+      }, 1400);
+    } else {
+      panel.innerHTML = `
+        <div class="stk-status">
+          <div class="stk-icon wait">⏳</div>
+          <div class="stk-title">Withdrawal held for review</div>
+          <div class="stk-desc">${fmt(value)} is over the ${fmt(AUTO_APPROVE_LIMIT)} instant limit, so it's been sent to our compliance team for a quick manual check. You'll get a notification the moment it's approved — usually within a few minutes.</div>
+          <button class="btn withdraw" id="wdAgainBtn">Back to wallet</button>
+        </div>
+      `;
+      document.getElementById('wdAgainBtn').addEventListener('click', renderPanel);
+      showToast('Withdrawal held for admin review — over instant limit');
+    }
+  });
+}
+
+function renderPanel(){
+  const panel=document.getElementById('actionPanel');
+  if(currentTab==='deposit'){ panel.innerHTML=depositView(); bindDeposit(); }
+  else { panel.innerHTML=withdrawView(); bindWithdraw(); }
+}
+
+document.getElementById('tabDeposit').addEventListener('click',()=>{
+  currentTab='deposit';
+  document.getElementById('tabDeposit').classList.add('active');
+  document.getElementById('tabWithdraw').classList.remove('active');
+  renderPanel();
+});
+document.getElementById('tabWithdraw').addEventListener('click',()=>{
+  currentTab='withdraw';
+  document.getElementById('tabWithdraw').classList.add('active');
+  document.getElementById('tabDeposit').classList.remove('active');
+  renderPanel();
+});
+
+renderPanel();
+</script>
+</body>
+</html>
