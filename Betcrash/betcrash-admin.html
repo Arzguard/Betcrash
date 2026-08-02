@@ -192,10 +192,43 @@
   .risk-flag.low{background:var(--green-dim);color:var(--green);}
   .risk-flag.med{background:var(--yellow-dim);color:var(--yellow);}
   .risk-flag.high{background:var(--red-dim);color:var(--red);}
+
+  .app-shell{display:flex;width:100%;min-height:100vh;}
+  .app-shell.hidden{display:none;}
+  .login-screen{position:fixed;inset:0;background:rgba(7,8,20,0.82);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:20px;z-index:1000;}
+  .login-screen.hidden{display:none;}
+  .login-card{width:min(100%,420px);background:rgba(23,20,74,0.95);border:1px solid var(--panel-line);border-radius:18px;padding:24px;box-shadow:0 18px 48px rgba(0,0,0,0.35);} 
+  .login-card h2{margin:0 0 8px;font-family:'Space Grotesk';font-size:24px;}
+  .login-card p{margin:0 0 16px;color:var(--text-mid);font-size:13px;line-height:1.5;}
+  .login-row{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
+  .login-row label{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-low);font-weight:700;}
+  .login-row input{padding:12px 13px;border-radius:10px;border:1px solid var(--panel-line);background:var(--void);color:var(--text-hi);font-size:14px;}
+  .login-row input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 2px rgba(51,226,138,0.16);} 
+  .login-card button{width:100%;border:none;padding:12px 14px;border-radius:10px;background:var(--yellow);color:#3B2900;font-weight:700;cursor:pointer;font-family:'Space Grotesk';}
+  .login-error{margin-top:12px;color:var(--red);font-size:12px;min-height:16px;}
+  .login-hint{margin-top:12px;font-size:11px;color:var(--text-mid);}
 </style>
 </head>
 <body>
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <h2>Admin access</h2>
+    <p>Sign in with the BetCrash admin credentials to open the control panel.</p>
+    <div class="login-row">
+      <label for="adminEmail">Email</label>
+      <input id="adminEmail" type="email" value="betcrash@gmail.com" autocomplete="email" />
+    </div>
+    <div class="login-row">
+      <label for="adminPassword">Password</label>
+      <input id="adminPassword" type="password" value="Timmadollar" autocomplete="current-password" />
+    </div>
+    <button id="loginBtn">Sign in</button>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-hint">Demo mode: the provided credentials unlock the admin dashboard directly.</div>
+  </div>
+</div>
 
+<div class="app-shell hidden" id="appShell">
 <div class="sidebar">
   <div class="brand">
     <div class="brand-mark">B</div>
@@ -315,8 +348,36 @@
     </table>
   </div>
 </div>
+</div>
 
 <script>
+const loginScreen = document.getElementById('loginScreen');
+const appShell = document.getElementById('appShell');
+const loginBtn = document.getElementById('loginBtn');
+const loginError = document.getElementById('loginError');
+const adminEmail = document.getElementById('adminEmail');
+const adminPassword = document.getElementById('adminPassword');
+
+function unlockAdmin() {
+  const email = (adminEmail.value || '').trim().toLowerCase();
+  const password = (adminPassword.value || '').trim();
+
+  if (email === 'betcrash@gmail.com' && password === 'Timmadollar') {
+    loginScreen.classList.add('hidden');
+    appShell.classList.remove('hidden');
+    loginError.textContent = '';
+  } else {
+    loginError.textContent = 'Invalid email or password.';
+  }
+}
+
+loginBtn.addEventListener('click', unlockAdmin);
+[adminEmail, adminPassword].forEach((input) => {
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') unlockAdmin();
+  });
+});
+
 // ---- Live rounds monitor ----
 const rounds=[
   {id:10483, mult:2.14, live:true, bets:'218,400', pct:38},

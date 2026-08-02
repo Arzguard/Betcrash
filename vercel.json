@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/", "destination": "/betcrash-onboarding.html" },
-    { "source": "/admin", "destination": "/Betcrash/betcrash-admin.html" }
+    { "source": "/admin", "destination": "/Betcrash/betcrash-admin.html" },
+    { "source": "/onboarding", "destination": "/betcrash-onboarding.html" }
   ]
 }

@@ -63,7 +63,23 @@
     background:var(--yellow);color:var(--void);border:none;border-radius:99px;
     padding:6px 14px;font-family:'Space Grotesk';font-weight:700;font-size:12.5px;cursor:pointer;
   }
-  .avatar{width:32px;height:32px;border-radius:9px;background:var(--panel-raised);border:1px solid var(--panel-line);}
+  .account-btn{
+    min-width:96px;
+    height:36px;
+    border-radius:99px;
+    border:1px solid var(--panel-line);
+    background:var(--panel-raised);
+    color:var(--text-hi);
+    font-family:'Space Grotesk';
+    font-weight:700;
+    font-size:12.5px;
+    cursor:pointer;
+    padding:0 14px;
+  }
+  .account-btn:hover{
+    background:rgba(51,226,138,0.08);
+    color:var(--green);
+  }
 
   /* ---------- Layout ---------- */
   .layout{
@@ -229,7 +245,7 @@
       </div>
       <button>Deposit</button>
     </div>
-    <div class="avatar"></div>
+    <button class="account-btn" id="accountBtn">Account</button>
   </div>
 </div>
 
@@ -463,6 +479,13 @@ autoSwitch.addEventListener('click',()=>{
   autoSwitch.classList.toggle('on',autoOn);
   autoRow.style.display=autoOn?'flex':'none';
 });
+
+const accountBtn=document.getElementById('accountBtn');
+if(accountBtn){
+  accountBtn.addEventListener('click',()=>{
+    window.location.href='/onboarding';
+  });
+}
 
 function newRound(){
   roundId++;
