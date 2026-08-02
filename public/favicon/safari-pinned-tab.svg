@@ -1,10 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <g fill="#000000">
-    <path d="M -24,0 L -18,-2 L -10,-3 L 0,-4 L 10,-3 L 18,-2 L 22,0 L 18,2 L 10,3 L 0,4 L -10,3 L -18,2 Z"/>
-    <path d="M 8,-3 L 14,-11 L 24,-6 L 18,0 Z"/>
-    <path d="M 8,3 L 14,11 L 24,6 L 18,0 Z"/>
-    <path d="M -18,-2 L -22,-10 L -14,-2 Z"/>
-    <polygon points="48,58 49,61 52,62 49,63 48,66 47,63 44,62 47,61"/>
-    <path d="M 48,62 C 56,54 68,42 76,30 L 80,27 L 73,28 L 76,32 Z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Safari pinned tab: single solid color (#38F29F green), no fills/gradients -->
+  <!-- Plane silhouette -->
+  <g transform="rotate(-35, 230, 250)">
+    <ellipse cx="230" cy="250" rx="95" ry="28" fill="#38F29F"/>
+    <path d="M 320 250 L 370 248 L 320 265 Z" fill="#38F29F"/>
+    <path d="M 200 245 L 145 185 L 255 235 Z" fill="#38F29F"/>
+    <path d="M 195 255 L 140 295 L 250 262 Z" fill="#38F29F"/>
+    <path d="M 140 242 L 105 205 L 155 240 Z" fill="#38F29F"/>
+    <path d="M 140 258 L 105 280 L 155 258 Z" fill="#38F29F"/>
   </g>
+  <!-- Chart bars -->
+  <rect x="256" y="350" width="40" height="100" rx="5" fill="#38F29F"/>
+  <rect x="308" y="305" width="40" height="145" rx="5" fill="#38F29F"/>
+  <rect x="360" y="260" width="40" height="190" rx="5" fill="#38F29F"/>
+  <rect x="412" y="215" width="40" height="235" rx="5" fill="#38F29F"/>
+  <!-- Trending arrow -->
+  <path d="M 210 430 Q 280 320 390 170" stroke="#38F29F" stroke-width="14" fill="none" stroke-linecap="round"/>
+  <polygon points="390,170 355,178 370,210" fill="#38F29F"/>
+  <!-- Explosion -->
+  <polygon points="185,330 195,295 215,325 240,300 230,340 265,335 240,360 255,395 215,375 205,410 185,375 155,390 165,355 130,350 160,330 150,295" fill="#38F29F"/>
 </svg>

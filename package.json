@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "generate:favicons": "node generate-favicons.js && node generate-ico.js"
+  },
+  "devDependencies": {
+    "png-to-ico": "^3.0.2",
+    "sharp": "^0.35.3"
+  }
+}

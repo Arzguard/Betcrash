@@ -1,39 +1,108 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="BetCrash">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="bc-bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#16123A"/>
-      <stop offset="1" stop-color="#211B55"/>
-    </linearGradient>
-    <linearGradient id="bc-bar" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#4E3DAF"/>
-      <stop offset="1" stop-color="#6B5BEA"/>
-    </linearGradient>
-    <filter id="bc-glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/>
-      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    <!-- Rounded square clip -->
+    <clipPath id="roundedClip">
+      <rect x="0" y="0" width="512" height="512" rx="110" ry="110"/>
+    </clipPath>
+    <!-- Green neon glow for plane -->
+    <filter id="greenGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
+    <!-- Gold glow for explosion -->
+    <filter id="goldGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- Outer border glow gradient -->
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38F29F" stop-opacity="0.9"/>
+      <stop offset="50%" stop-color="#9B6FFF" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#38F29F" stop-opacity="0.5"/>
+    </linearGradient>
+    <!-- Background gradient -->
+    <radialGradient id="bgGrad" cx="60%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#211B55"/>
+      <stop offset="100%" stop-color="#0E0C2B"/>
+    </radialGradient>
+    <!-- Green plane body gradient -->
+    <linearGradient id="planeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6FFFC0"/>
+      <stop offset="100%" stop-color="#1DD67A"/>
+    </linearGradient>
+    <!-- Chart bar gradient -->
+    <linearGradient id="barGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#5A4FC0"/>
+      <stop offset="100%" stop-color="#39327E"/>
+    </linearGradient>
+    <!-- Arrow gradient -->
+    <linearGradient id="arrowGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38F29F"/>
+      <stop offset="100%" stop-color="#6FFFC0"/>
+    </linearGradient>
   </defs>
-  <rect x="2" y="2" width="96" height="96" rx="24" fill="#38F29F" opacity="0.18" filter="url(#bc-glow)"/>
-  <rect x="4" y="4" width="92" height="92" rx="22" fill="url(#bc-bg)" stroke="#39327E" stroke-width="1.5"/>
-  <g fill="url(#bc-bar)" opacity="0.5">
-    <rect x="14" y="58" width="5" height="22"/>
-    <rect x="22" y="54" width="5" height="26"/>
-    <rect x="30" y="48" width="5" height="32"/>
-    <rect x="38" y="42" width="5" height="38"/>
-  </g>
-  <path d="M 48,62 C 56,54 68,42 76,30" stroke="#38F29F" stroke-width="7" fill="none" opacity="0.12" stroke-linecap="round"/>
-  <path d="M 48,62 C 56,54 68,42 76,30" stroke="#38F29F" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M 76,30 L 80,27 L 73,28 L 76,32 Z" fill="#38F29F"/>
-  <polygon points="48,58 49,61 52,62 49,63 48,66 47,63 44,62 47,61" fill="#FFD24A"/>
-  <g transform="translate(50,46) rotate(20)">
-    <path d="M -24,0 L -18,-2 L -10,-3 L 0,-4 L 10,-3 L 18,-2 L 22,0 L 18,2 L 10,3 L 0,4 L -10,3 L -18,2 Z" fill="#38F29F"/>
-    <path d="M 8,-3 L 14,-11 L 24,-6 L 18,0 Z" fill="#38F29F"/>
-    <path d="M 8,3 L 14,11 L 24,6 L 18,0 Z" fill="#38F29F"/>
-    <path d="M -18,-2 L -22,-10 L -14,-2 Z" fill="#38F29F"/>
-    <g stroke="#38F29F" stroke-width="2.5" opacity="0.5" stroke-linecap="round">
-      <line x1="-26" y1="-1" x2="-34" y2="-3"/>
-      <line x1="-26" y1="0" x2="-36" y2="0"/>
-      <line x1="-26" y1="1" x2="-34" y2="3"/>
+
+  <!-- Background rounded square -->
+  <rect x="0" y="0" width="512" height="512" rx="110" ry="110" fill="url(#bgGrad)"/>
+
+  <!-- Outer neon border glow -->
+  <rect x="4" y="4" width="504" height="504" rx="108" ry="108" fill="none" stroke="url(#borderGrad)" stroke-width="6" opacity="0.85"/>
+
+  <!-- Clipping group -->
+  <g clip-path="url(#roundedClip)">
+
+    <!-- === BAR CHART (purple bars, bottom-right) === -->
+    <!-- Bar 1 (shortest, leftmost) -->
+    <rect x="256" y="350" width="40" height="100" rx="5" fill="url(#barGrad)"/>
+    <!-- Bar 2 -->
+    <rect x="308" y="305" width="40" height="145" rx="5" fill="url(#barGrad)"/>
+    <!-- Bar 3 -->
+    <rect x="360" y="260" width="40" height="190" rx="5" fill="url(#barGrad)"/>
+    <!-- Bar 4 (tallest, rightmost) -->
+    <rect x="412" y="215" width="40" height="235" rx="5" fill="url(#barGrad)"/>
+
+    <!-- Base line for chart -->
+    <rect x="240" y="448" width="230" height="4" rx="2" fill="#39327E"/>
+
+    <!-- === TRENDING ARROW (green, bottom-left to top-right) === -->
+    <!-- Arrow line -->
+    <path d="M 210 430 Q 280 320 390 170" stroke="url(#arrowGrad)" stroke-width="14" fill="none" stroke-linecap="round" filter="url(#greenGlow)"/>
+    <!-- Arrow head -->
+    <polygon points="390,170 355,178 370,210" fill="#38F29F" filter="url(#greenGlow)"/>
+
+    <!-- === GOLD EXPLOSION (center-left, behind/below plane) === -->
+    <g filter="url(#goldGlow)">
+      <!-- Explosion star burst -->
+      <polygon points="185,330 195,295 215,325 240,300 230,340 265,335 240,360 255,395 215,375 205,410 185,375 155,390 165,355 130,350 160,330 150,295"
+               fill="#FFD24A" opacity="0.95"/>
+      <!-- Inner bright core -->
+      <ellipse cx="200" cy="355" rx="28" ry="24" fill="#FFF0A0" opacity="0.9"/>
     </g>
+
+    <!-- === PLANE (green neon, diagonal top-right flight) === -->
+    <g filter="url(#greenGlow)" transform="rotate(-35, 230, 250)">
+      <!-- Main fuselage -->
+      <ellipse cx="230" cy="250" rx="95" ry="28" fill="url(#planeGrad)"/>
+      <!-- Nose cone -->
+      <path d="M 320 250 L 370 248 L 320 265 Z" fill="#38F29F"/>
+      <!-- Top wing -->
+      <path d="M 200 245 L 145 185 L 255 235 Z" fill="#38F29F"/>
+      <!-- Bottom wing -->
+      <path d="M 195 255 L 140 295 L 250 262 Z" fill="#2ECC8A"/>
+      <!-- Tail fin top -->
+      <path d="M 140 242 L 105 205 L 155 240 Z" fill="#38F29F"/>
+      <!-- Tail fin bottom -->
+      <path d="M 140 258 L 105 280 L 155 258 Z" fill="#2ECC8A"/>
+      <!-- Wing tip highlight -->
+      <path d="M 148 190 L 155 195 L 150 200 Z" fill="#AAFFD8" opacity="0.8"/>
+    </g>
+
+    <!-- Motion streaks (behind plane tail) -->
+    <g opacity="0.7" transform="rotate(-35, 120, 295)">
+      <line x1="80" y1="280" x2="130" y2="278" stroke="#38F29F" stroke-width="5" stroke-linecap="round"/>
+      <line x1="70" y1="295" x2="125" y2="293" stroke="#38F29F" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+      <line x1="75" y1="310" x2="122" y2="308" stroke="#38F29F" stroke-width="3" stroke-linecap="round" opacity="0.4"/>
+    </g>
+
   </g>
 </svg>

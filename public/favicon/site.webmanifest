@@ -1,1 +1,41 @@
-{"name": "BetCrash", "short_name": "BetCrash", "icons": [{"src": "/favicon/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png"}, {"src": "/favicon/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png"}], "theme_color": "#16123A", "background_color": "#16123A", "display": "standalone"}
+{
+  "name": "BetCrash",
+  "short_name": "BetCrash",
+  "description": "Premium crash gaming",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#16123A",
+  "background_color": "#16123A",
+  "icons": [
+    {
+      "src": "/favicon/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [],
+  "categories": ["games", "entertainment"]
+}

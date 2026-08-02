@@ -4,13 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>BetCrash — Create account</title>
+  <link rel="shortcut icon" href="/favicon/favicon.ico">
   <link rel="icon" href="/favicon/favicon.svg" type="image/svg+xml">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
-  <link rel="apple-touch-icon" href="/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon/favicon-48x48.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
   <link rel="manifest" href="/favicon/site.webmanifest">
   <meta name="theme-color" content="#16123A">
   <meta name="color-scheme" content="dark">
+  <meta name="msapplication-TileImage" content="/favicon/mstile-150x150.png">
+  <meta name="msapplication-TileColor" content="#16123A">
   <meta property="og:title" content="BetCrash">
   <meta property="og:description" content="Premium crash gaming">
   <meta property="og:image" content="/favicon/og-image.png">
@@ -43,7 +47,8 @@
   input:focus,textarea:focus{outline:none;border-color:var(--green)!important;box-shadow:0 0 0 3px rgba(56,242,159,.18);}
   .btn:active{transform:scale(.97);transition:transform .12s ease;}
   .brand{display:flex;align-items:center;gap:10px;margin-bottom:28px;}
-  .brand-mark{width:30px;height:30px;border-radius:8px;background:conic-gradient(from 220deg, var(--green), var(--yellow), var(--green));display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-weight:700;color:var(--void);font-size:15px;}
+  .brand-mark{width:34px;height:34px;border-radius:10px;background:transparent;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .brand-mark img{width:34px;height:34px;object-fit:contain;}
   .brand-name{font-family:'Space Grotesk';font-weight:700;font-size:17px;}
   .brand-name span{color:var(--yellow);}
 
@@ -139,11 +144,13 @@
 </style>
 </head>
 <body>
-<div id="app-loader" style="position:fixed;inset:0;z-index:9999;background:#16123A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;opacity:1;transition:opacity .4s ease,visibility .4s ease;">
-  <div style="width:48px;height:48px;animation:neo-pulse 1.2s ease-in-out infinite;">
-    <img src="/favicon/favicon.svg" alt="" width="48" height="48">
+<div id="app-loader" style="position:fixed;inset:0;z-index:9999;background:#16123A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;opacity:1;transition:opacity .4s ease,visibility .4s ease;">
+  <div style="width:72px;height:72px;animation:neo-pulse 1.2s ease-in-out infinite;">
+    <img src="/favicon/favicon.svg" alt="" width="72" height="72">
   </div>
-  <div style="font-family:'Space Grotesk';font-weight:700;font-size:18px;color:#38F29F;letter-spacing:.02em;">BetCrash</div>
+  <div style="font-family:'Space Grotesk';font-weight:700;font-size:22px;letter-spacing:.04em;">
+    <span style="color:#FFFFFF;">Bet</span><span style="color:#FFD24A;">Crash</span>
+  </div>
 </div>
 <style>
 @keyframes neo-pulse{0%,100%{filter:drop-shadow(0 0 6px rgba(56,242,159,.3));transform:scale(1);}50%{filter:drop-shadow(0 0 16px rgba(56,242,159,.6));transform:scale(1.05);}}
@@ -152,7 +159,7 @@
 
 
 <div class="brand">
-  <div class="brand-mark"><img src="/favicon/favicon.svg" alt="BetCrash" width="30" height="30"></div>
+  <div class="brand-mark"><img src="/favicon/favicon.svg" alt="BetCrash" width="34" height="34"></div>
   <div class="brand-name">Bet<span>Crash</span></div>
 </div>
 
