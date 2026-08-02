@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BetCrash — KYC Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0E0C2B; --panel:#17144A; --panel-raised:#201C5C; --panel-line:#2C2870;
+    --green:#33E28A; --green-dim:rgba(51,226,138,0.14);
+    --yellow:#FFD23F; --yellow-dim:rgba(255,210,63,0.13);
+    --red:#FF5C6C; --red-dim:rgba(255,92,108,0.14);
+    --text-hi:#F5F4FF; --text-mid:#9C98CC; --text-low:#625E96;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:radial-gradient(120% 140% at 100% -10%, #211D63 0%, var(--void) 55%);color:var(--text-hi);font-family:'Inter',sans-serif;min-height:100vh;display:flex;}
+  ::selection{background:var(--yellow);color:var(--void);}
+
+  .sidebar{width:210px;flex:0 0 210px;background:rgba(23,20,74,0.6);border-right:1px solid var(--panel-line);padding:18px 14px;position:sticky;top:0;height:100vh;}
+  .brand{display:flex;align-items:center;gap:10px;padding:0 6px 20px;}
+  .brand-mark{width:28px;height:28px;border-radius:8px;background:conic-gradient(from 220deg, var(--green), var(--yellow), var(--green));display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-weight:700;color:var(--void);font-size:14px;}
+  .brand-name{font-family:'Space Grotesk';font-weight:700;font-size:15px;}
+  .brand-name span{color:var(--yellow);}
+  .nav-label{font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-low);padding:0 10px;margin-bottom:6px;font-weight:600;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;font-size:13px;color:var(--text-mid);cursor:pointer;font-weight:500;}
+  .nav-item.active{background:var(--panel-raised);color:var(--text-hi);}
+  .nav-item .count{margin-left:auto;background:var(--yellow-dim);color:var(--yellow);font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px;font-family:'JetBrains Mono';}
+
+  .main{flex:1;min-width:0;padding:20px 26px 40px;display:grid;grid-template-columns:340px 1fr;gap:16px;}
+  @media (max-width:1000px){ .main{grid-template-columns:1fr;} }
+
+  .topline{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .topline h1{font-family:'Space Grotesk';font-size:20px;margin:0;font-weight:700;}
+  .topline .sub{font-size:12px;color:var(--text-mid);margin-top:3px;}
+
+  /* queue list */
+  .queue-panel{background:var(--panel);border:1px solid var(--panel-line);border-radius:14px;padding:12px;height:fit-content;}
+  .queue-item{
+    padding:12px;border-radius:10px;cursor:pointer;border:1px solid transparent;margin-bottom:6px;
+  }
+  .queue-item:hover{background:var(--panel-raised);}
+  .queue-item.active{background:var(--panel-raised);border-color:var(--green);}
+  .queue-item.new{border-color:rgba(255,210,63,0.4);background:var(--yellow-dim);}
+  .qi-top{display:flex;justify-content:space-between;align-items:center;}
+  .qi-name{font-weight:600;font-size:13px;}
+  .qi-time{font-size:10.5px;color:var(--text-low);font-family:'JetBrains Mono';}
+  .qi-sub{font-size:11.5px;color:var(--text-mid);margin-top:3px;}
+  .qi-badge{display:inline-block;margin-top:6px;font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:99px;text-transform:uppercase;letter-spacing:0.04em;}
+  .qi-badge.new{background:var(--yellow);color:#3B2900;}
+  .qi-badge.pending{background:var(--panel);color:var(--text-mid);border:1px solid var(--panel-line);}
+
+  /* detail */
+  .detail{background:var(--panel);border:1px solid var(--panel-line);border-radius:14px;padding:22px;}
+  .detail-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--panel-line);}
+  .detail-head h2{font-family:'Space Grotesk';font-size:18px;margin:0 0 4px;font-weight:700;}
+  .detail-head .meta{font-size:12px;color:var(--text-mid);font-family:'JetBrains Mono';}
+  .risk-flag{font-size:10.5px;padding:3px 10px;border-radius:99px;font-weight:700;}
+  .risk-flag.low{background:var(--green-dim);color:var(--green);}
+
+  .info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+  .info-cell{background:var(--void);border:1px solid var(--panel-line);border-radius:10px;padding:12px;}
+  .info-cell .l{font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-low);margin-bottom:4px;}
+  .info-cell .v{font-family:'JetBrains Mono';font-size:13px;font-weight:600;}
+  .info-cell .v.ok{color:var(--green);}
+
+  .docs-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
+  .doc-card{background:var(--void);border:1px solid var(--panel-line);border-radius:12px;padding:12px;}
+  .doc-card .label{font-size:11px;color:var(--text-mid);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em;}
+  .doc-preview{border-radius:9px;height:160px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+  .doc-preview.id{background:linear-gradient(135deg,#242066,#17144A);border:1px solid var(--panel-line);}
+  .doc-preview.selfie{background:radial-gradient(circle at 50% 40%, #2C2870, #14123A);border:1px solid var(--panel-line);}
+  .id-mock{width:82%;height:70%;border-radius:8px;background:var(--panel-raised);border:1px solid var(--panel-line);padding:10px;display:flex;gap:10px;}
+  .id-mock .photo{width:44px;height:54px;border-radius:5px;background:linear-gradient(160deg,#3A3690,#1E1B57);flex:0 0 auto;}
+  .id-mock .lines{flex:1;display:flex;flex-direction:column;gap:6px;justify-content:center;}
+  .id-mock .lines div{height:6px;border-radius:3px;background:var(--panel-line);}
+  .id-mock .lines div:nth-child(1){width:80%;}
+  .id-mock .lines div:nth-child(2){width:60%;}
+  .id-mock .lines div:nth-child(3){width:70%;}
+  .selfie-mock{width:76px;height:96px;border-radius:38px 38px 34px 34px;background:linear-gradient(160deg,#3A3690,#221E60);border:2px solid var(--panel-line);}
+  .doc-verdict{display:flex;justify-content:space-between;align-items:center;margin-top:9px;font-size:11.5px;}
+  .doc-verdict .match{color:var(--green);font-family:'JetBrains Mono';font-weight:700;}
+
+  .checks{margin-bottom:20px;}
+  .check-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--panel-line);font-size:13px;}
+  .check-row:last-child{border-bottom:none;}
+  .check-mark{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex:0 0 auto;background:var(--green);color:#062616;}
+  .check-row .note{margin-left:auto;font-size:11.5px;color:var(--text-low);font-family:'JetBrains Mono';}
+
+  .action-row{display:flex;gap:10px;}
+  .action-row button{flex:1;padding:13px;border-radius:10px;border:none;font-family:'Space Grotesk';font-weight:700;font-size:14px;cursor:pointer;}
+  .btn-approve{background:var(--green);color:#062616;}
+  .btn-deny{background:transparent;border:1px solid var(--red);color:var(--red);}
+  .btn-approve:disabled, .btn-deny:disabled{opacity:0.4;cursor:not-allowed;}
+
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--panel-raised);border:1px solid var(--green);color:var(--text-hi);
+    padding:12px 20px;border-radius:10px;font-size:13px;font-family:'Space Grotesk';font-weight:600;
+    opacity:0;transition:all .25s ease;display:flex;align-items:center;gap:8px;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast .dot{width:7px;height:7px;border-radius:50%;background:var(--green);}
+
+  .resolved-view{text-align:center;padding:50px 20px;}
+  .resolved-icon{width:60px;height:60px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--green-dim);color:var(--green);}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="brand"><div class="brand-mark">B</div><div class="brand-name">Bet<span>Crash</span></div></div>
+  <div class="nav-label">Operations</div>
+  <div class="nav-item">Live betting</div>
+  <div class="nav-item">Users</div>
+  <div class="nav-item">Wallets & payouts</div>
+  <div class="nav-item active">KYC queue<span class="count" id="navCount">9</span></div>
+  <div class="nav-item">Fraud & risk</div>
+</div>
+
+<div class="main">
+  <div class="topline">
+    <div>
+      <h1>KYC verification queue</h1>
+      <div class="sub">New submissions land here in real time · assigned to Compliance</div>
+    </div>
+  </div>
+
+  <div class="queue-panel" id="queuePanel"></div>
+  <div class="detail" id="detailPanel"></div>
+</div>
+
+<div class="toast" id="toast"><span class="dot"></span><span id="toastText"></span></div>
+
+<script>
+let queue=[
+  {id:'u_9931', name:'Grace Wanjiku', email:'grace.w@example.com', phone:'0712 345 678', dob:'14 Mar 1998', age:28, idNumber:'31228845', submitted:'just now', status:'new', idMatch:98},
+  {id:'u_9928', name:'Brian Otieno', email:'b.otieno@example.com', phone:'0722 981 004', dob:'02 Nov 1995', age:30, idNumber:'29981144', submitted:'6 min ago', status:'pending', idMatch:96, duplicateOf:'Verified account u_8410 (Brian K. Otieno)'},
+  {id:'u_9924', name:'Faith Nyambura', email:'f.nyambura@example.com', phone:'0701 552 213', dob:'19 Jul 2001', age:25, idNumber:'40559217', submitted:'22 min ago', status:'pending', idMatch:94},
+  {id:'u_9920', name:'Kevin Mutiso', email:'k.mutiso@example.com', phone:'0733 118 902', dob:'08 Jan 1999', age:27, idNumber:'35201188', submitted:'41 min ago', status:'pending', idMatch:99},
+  {id:'u_9917', name:'Purity Chebet', email:'p.chebet@example.com', phone:'0798 442 671', dob:'27 May 2003', age:23, idNumber:'40112203', submitted:'1 hr ago', status:'pending', idMatch:91},
+];
+let selectedId=queue[0].id;
+let resolved={};
+
+function renderQueue(){
+  const el=document.getElementById('queuePanel');
+  el.innerHTML = queue.map(q=>`
+    <div class="queue-item ${q.id===selectedId?'active':''} ${q.status==='new'?'new':''}" data-id="${q.id}">
+      <div class="qi-top"><span class="qi-name">${q.name}</span><span class="qi-time">${q.submitted}</span></div>
+      <div class="qi-sub">${q.email}</div>
+      <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
+        <div class="qi-badge ${q.status==='new'?'new':'pending'}" style="margin-top:0;">${resolved[q.id] ? resolved[q.id] : (q.status==='new'?'New submission':'Awaiting review')}</div>
+        ${q.duplicateOf && !resolved[q.id] ? '<div class="qi-badge" style="margin-top:0;background:var(--red-dim);color:var(--red);border:1px solid rgba(255,92,108,0.4);">⚠ Duplicate ID</div>' : ''}
+      </div>
+    </div>
+  `).join('');
+  el.querySelectorAll('.queue-item').forEach(item=>{
+    item.addEventListener('click',()=>{ selectedId=item.dataset.id; renderQueue(); renderDetail(); });
+  });
+  document.getElementById('navCount').textContent = queue.filter(q=>!resolved[q.id]).length;
+}
+
+function renderDetail(){
+  const q=queue.find(x=>x.id===selectedId);
+  const el=document.getElementById('detailPanel');
+  if(resolved[q.id]){
+    const approved = resolved[q.id]==='Approved';
+    el.innerHTML = `
+      <div class="resolved-view">
+        <div class="resolved-icon" style="background:${approved?'var(--green-dim)':'var(--red-dim)'};color:${approved?'var(--green)':'var(--red)'}">${approved?'✓':'✕'}</div>
+        <h2 style="font-family:'Space Grotesk';margin:0 0 6px;">${q.name} — ${approved?'Verified':'Denied'}</h2>
+        <div style="color:var(--text-mid);font-size:13px;">Logged to audit trail · action by Compliance Admin</div>
+      </div>
+    `;
+    return;
+  }
+  el.innerHTML = `
+    <div class="detail-head">
+      <div>
+        <h2>${q.name}</h2>
+        <div class="meta">${q.id} · submitted ${q.submitted}</div>
+      </div>
+      <span class="risk-flag ${q.duplicateOf?'high':'low'}">${q.duplicateOf?'Duplicate ID':'Low risk'}</span>
+    </div>
+
+    ${q.duplicateOf ? `
+    <div style="background:var(--red-dim);border:1px solid rgba(255,92,108,0.4);border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:12.5px;color:var(--text-hi);display:flex;gap:10px;align-items:flex-start;">
+      <span style="font-size:16px;line-height:1;">⚠️</span>
+      <div>
+        <b style="color:var(--red);">This ID number is already on file.</b><br>
+        Matches <b>${q.duplicateOf}</b>. One account per ID number is enforced platform-wide — approving this would create a duplicate. Deny, or escalate to Fraud &amp; Risk if the person disputes it.
+      </div>
+    </div>` : ''}
+
+    <div class="info-grid">
+      <div class="info-cell"><div class="l">Email</div><div class="v">${q.email}</div></div>
+      <div class="info-cell"><div class="l">Phone</div><div class="v">${q.phone}</div></div>
+      <div class="info-cell"><div class="l">Date of birth</div><div class="v ok">${q.dob} (${q.age})</div></div>
+    </div>
+
+    <div class="info-grid" style="grid-template-columns:1fr;">
+      <div class="info-cell"><div class="l">National ID / Passport number</div><div class="v ${q.duplicateOf?'':'ok'}" style="${q.duplicateOf?'color:var(--red);':''}">${q.idNumber}${q.duplicateOf?' — already registered':''}</div></div>
+    </div>
+
+    <div class="docs-grid">
+      <div class="doc-card">
+        <div class="label">National ID</div>
+        <div class="doc-preview id"><div class="id-mock"><div class="photo"></div><div class="lines"><div></div><div></div><div></div></div></div></div>
+        <div class="doc-verdict"><span>Document authenticity</span><span class="match">Passed</span></div>
+      </div>
+      <div class="doc-card">
+        <div class="label">Selfie / liveness</div>
+        <div class="doc-preview selfie"><div class="selfie-mock"></div></div>
+        <div class="doc-verdict"><span>Face match to ID</span><span class="match">${q.idMatch}%</span></div>
+      </div>
+    </div>
+
+    <div class="checks">
+      <div class="check-row"><div class="check-mark">✓</div>Age verified — 18 or older<span class="note">auto-check</span></div>
+      <div class="check-row"><div class="check-mark">✓</div>ID document unaltered<span class="note">auto-check</span></div>
+      <div class="check-row"><div class="check-mark">✓</div>Name matches across ID, email &amp; phone<span class="note">auto-check</span></div>
+      <div class="check-row"><div class="check-mark">✓</div>No match on sanctions / self-exclusion list<span class="note">auto-check</span></div>
+      <div class="check-row">
+        <div class="check-mark" style="background:${q.duplicateOf?'var(--red)':'var(--green)'};color:${q.duplicateOf?'#3B0A0A':'#062616'};">${q.duplicateOf?'✕':'✓'}</div>
+        ID number unique across platform
+        <span class="note" style="color:${q.duplicateOf?'var(--red)':'var(--text-low)'};">${q.duplicateOf?'match found':'auto-check'}</span>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn-approve" id="approveBtn" ${q.duplicateOf?'disabled title="Cannot approve — duplicate ID number"':''}>Approve &amp; verify user</button>
+      <button class="btn-deny" id="denyBtn">Deny</button>
+    </div>
+  `;
+  document.getElementById('approveBtn').addEventListener('click',()=>{ if(!q.duplicateOf) resolve(q.id,'Approved'); });
+  document.getElementById('denyBtn').addEventListener('click',()=>resolve(q.id,'Denied'));
+}
+
+function resolve(id, verdict){
+  resolved[id]=verdict;
+  showToast(`${queue.find(q=>q.id===id).name} marked "${verdict}" — user notified, audit log updated`);
+  renderQueue();
+  renderDetail();
+}
+
+function showToast(text){
+  const t=document.getElementById('toast');
+  document.getElementById('toastText').textContent=text;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+renderQueue();
+renderDetail();
+</script>
+</body>
+</html>

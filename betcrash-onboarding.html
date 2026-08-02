@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BetCrash — Create account</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0E0C2B; --panel:#17144A; --panel-raised:#201C5C; --panel-line:#2C2870;
+    --green:#33E28A; --green-dim:rgba(51,226,138,0.14);
+    --yellow:#FFD23F; --yellow-dim:rgba(255,210,63,0.13);
+    --red:#FF5C6C; --red-dim:rgba(255,92,108,0.14);
+    --text-hi:#F5F4FF; --text-mid:#9C98CC; --text-low:#625E96;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:radial-gradient(120% 140% at 15% -10%, #211D63 0%, var(--void) 55%);
+    color:var(--text-hi);font-family:'Inter',sans-serif;min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;padding:26px 16px 60px;
+  }
+  ::selection{background:var(--yellow);color:var(--void);}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:28px;}
+  .brand-mark{width:30px;height:30px;border-radius:8px;background:conic-gradient(from 220deg, var(--green), var(--yellow), var(--green));display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-weight:700;color:var(--void);font-size:15px;}
+  .brand-name{font-family:'Space Grotesk';font-weight:700;font-size:17px;}
+  .brand-name span{color:var(--yellow);}
+
+  /* stepper */
+  .stepper{display:flex;align-items:center;gap:6px;margin-bottom:26px;max-width:460px;width:100%;}
+  .step-dot{
+    flex:1;height:4px;border-radius:99px;background:var(--panel-line);position:relative;overflow:hidden;
+  }
+  .step-dot .fill{position:absolute;inset:0;background:var(--green);width:0%;transition:width .4s ease;}
+  .step-dot.done .fill{width:100%;}
+  .step-dot.active .fill{width:55%;background:var(--yellow);}
+
+  .card{
+    width:100%;max-width:460px;background:var(--panel);border:1px solid var(--panel-line);
+    border-radius:16px;padding:28px;
+  }
+  .card h2{font-family:'Space Grotesk';font-size:20px;margin:0 0 4px;font-weight:700;}
+  .card .desc{font-size:13px;color:var(--text-mid);margin-bottom:22px;line-height:1.5;}
+
+  label{font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-mid);font-weight:600;display:block;margin-bottom:6px;}
+  .field{margin-bottom:14px;}
+  input, select{
+    width:100%;background:var(--void);border:1px solid var(--panel-line);border-radius:9px;
+    padding:11px 12px;color:var(--text-hi);font-family:'Inter';font-size:14px;outline:none;
+  }
+  input:focus, select:focus{border-color:var(--green);}
+  .hint{font-size:11px;color:var(--text-low);margin-top:5px;}
+  .hint.err{color:var(--red);}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+  .btn{
+    width:100%;padding:13px;border:none;border-radius:10px;font-family:'Space Grotesk';font-weight:700;
+    font-size:14.5px;cursor:pointer;background:var(--green);color:#062616;margin-top:6px;
+  }
+  .btn:disabled{background:var(--panel-raised);color:var(--text-low);cursor:not-allowed;}
+  .btn.secondary{background:transparent;border:1px solid var(--panel-line);color:var(--text-mid);margin-top:8px;}
+  .link{color:var(--yellow);cursor:pointer;font-weight:600;}
+
+  /* OTP */
+  .otp-row{display:flex;gap:8px;margin-bottom:6px;}
+  .otp-row input{
+    text-align:center;font-family:'JetBrains Mono';font-size:20px;font-weight:700;padding:12px 0;
+  }
+  .resend{font-size:12.5px;color:var(--text-mid);margin-top:12px;text-align:center;}
+
+  /* KYC upload */
+  .upload-box{
+    border:1.5px dashed var(--panel-line);border-radius:12px;padding:20px;text-align:center;
+    margin-bottom:14px;cursor:pointer;transition:border-color .15s ease;
+  }
+  .upload-box:hover{border-color:var(--green);}
+  .upload-box.filled{border-style:solid;border-color:var(--green);background:var(--green-dim);}
+  .upload-box .icon{font-size:22px;margin-bottom:6px;}
+  .upload-box .title{font-family:'Space Grotesk';font-weight:600;font-size:13px;}
+  .upload-box .sub{font-size:11px;color:var(--text-low);margin-top:3px;}
+
+  /* pending / status */
+  .status-center{text-align:center;padding:10px 0 4px;}
+  .status-icon{
+    width:64px;height:64px;border-radius:50%;margin:0 auto 18px;
+    display:flex;align-items:center;justify-content:center;font-size:26px;
+  }
+  .status-icon.pending{background:var(--yellow-dim);color:var(--yellow);}
+  .status-icon.verified{background:var(--green-dim);color:var(--green);}
+  .checklist{margin-top:20px;text-align:left;}
+  .check-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--panel-line);font-size:13px;}
+  .check-row:last-child{border-bottom:none;}
+  .check-mark{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex:0 0 auto;}
+  .check-mark.done{background:var(--green);color:#062616;}
+  .check-mark.wait{background:var(--panel-raised);border:1px solid var(--panel-line);color:var(--text-low);}
+  .check-row.wait{color:var(--text-mid);}
+
+  .foot-note{font-size:11.5px;color:var(--text-low);text-align:center;margin-top:16px;line-height:1.5;}
+</style>
+</head>
+<body>
+
+<div class="brand">
+  <div class="brand-mark">B</div>
+  <div class="brand-name">Bet<span>Crash</span></div>
+</div>
+
+<div class="stepper" id="stepper"></div>
+
+<div class="card" id="card"></div>
+
+<script>
+const STEPS=['register','phone_otp','kyc','pending','verified'];
+let stepIdx=0;
+let userData={name:'',email:'',phone:'',password:'',dob:'',idNumber:'',idDoc:false,selfie:false};
+
+// mock registry — in production this is a backend lookup against every verified account's ID number
+const REGISTERED_ID_NUMBERS=['34567891','29981144','40112203'];
+
+function renderStepper(){
+  const el=document.getElementById('stepper');
+  el.innerHTML='';
+  const visibleSteps=4; // register, phone, kyc, review(pending/verified collapse)
+  const progressIdx=Math.min(stepIdx,3);
+  for(let i=0;i<visibleSteps;i++){
+    const d=document.createElement('div');
+    d.className='step-dot'+(i<progressIdx?' done':i===progressIdx?' active':'');
+    d.innerHTML='<div class="fill"></div>';
+    el.appendChild(d);
+  }
+}
+
+function goTo(step){
+  stepIdx=STEPS.indexOf(step);
+  renderStepper();
+  render();
+}
+
+function render(){
+  const step=STEPS[stepIdx];
+  const card=document.getElementById('card');
+  if(step==='register') card.innerHTML=viewRegister();
+  else if(step==='email_otp') card.innerHTML=viewOtp('email', userData.email);
+  else if(step==='phone_otp') card.innerHTML=viewOtp('phone', userData.phone);
+  else if(step==='kyc') card.innerHTML=viewKyc();
+  else if(step==='pending') card.innerHTML=viewPending();
+  else if(step==='verified') card.innerHTML=viewVerified();
+  bindEvents(step);
+}
+
+function viewRegister(){
+  return `
+    <h2>Create your account</h2>
+    <div class="desc">Takes about two minutes. We'll send a verification code to your phone next.</div>
+    <div class="field"><label>Full name</label><input id="rName" placeholder="e.g. Grace Wanjiku" value="${userData.name}"></div>
+    <div class="field"><label>Email address</label><input id="rEmail" type="email" placeholder="you@example.com" value="${userData.email}"></div>
+    <div class="field"><label>Phone number</label><input id="rPhone" placeholder="07XX XXX XXX" value="${userData.phone}"></div>
+    <div class="row2">
+      <div class="field"><label>Password</label><input id="rPass" type="password" placeholder="Min. 8 characters"></div>
+      <div class="field"><label>Confirm</label><input id="rPass2" type="password" placeholder="Repeat password"></div>
+    </div>
+    <div class="hint" id="rHint">You must be 18 or older to register.</div>
+    <button class="btn" id="rBtn">Continue</button>
+    <div class="foot-note">By continuing you agree to our Terms & the Responsible Gambling policy.</div>
+  `;
+}
+
+function viewOtp(kind, dest){
+  const label = kind==='email' ? 'Verify your email' : 'Verify your phone';
+  const desc = kind==='email'
+    ? `We sent a 6-digit code to <b style="color:var(--text-hi)">${dest||'your email'}</b>.`
+    : `We sent a 6-digit SMS code to <b style="color:var(--text-hi)">${dest||'your phone'}</b>.`;
+  return `
+    <h2>${label}</h2>
+    <div class="desc">${desc}</div>
+    <div class="otp-row">
+      ${[0,1,2,3,4,5].map(i=>`<input maxlength="1" inputmode="numeric" class="otpDigit" data-i="${i}">`).join('')}
+    </div>
+    <div class="hint" id="otpHint">Enter the 6-digit code — try <b style="color:var(--text-mid)">482913</b> (demo).</div>
+    <button class="btn" id="otpBtn" disabled>Verify code</button>
+    <div class="resend">Didn't get it? <span class="link" id="resendLink">Resend code</span></div>
+  `;
+}
+
+function viewKyc(){
+  return `
+    <h2>Verify your identity</h2>
+    <div class="desc">Required by Kenyan gaming regulations before you can deposit or withdraw.</div>
+    <div class="field"><label>Date of birth</label><input id="kDob" type="date"></div>
+    <div class="hint" id="dobHint"></div>
+    <div class="field"><label>National ID / Passport number</label><input id="kIdNum" placeholder="e.g. 34567891" inputmode="numeric"></div>
+    <div class="hint" id="idNumHint">One account per ID number — this is checked automatically.</div>
+    <div class="upload-box" id="boxId">
+      <div class="icon">🪪</div>
+      <div class="title">Upload National ID or Passport</div>
+      <div class="sub">Clear photo, all corners visible · JPG or PNG</div>
+    </div>
+    <div class="upload-box" id="boxSelfie">
+      <div class="icon">🤳</div>
+      <div class="title">Take a quick selfie</div>
+      <div class="sub">Used to match your face to your ID</div>
+    </div>
+    <button class="btn" id="kycBtn" disabled>Submit for verification</button>
+  `;
+}
+
+function viewPending(){
+  return `
+    <div class="status-center">
+      <div class="status-icon pending">⏳</div>
+      <h2>Verification in progress</h2>
+      <div class="desc">Our compliance team is reviewing your documents. This usually takes a few minutes, occasionally up to 24 hours.</div>
+    </div>
+    <div class="checklist">
+      <div class="check-row"><div class="check-mark done">✓</div>Account created</div>
+      <div class="check-row"><div class="check-mark done">✓</div>Phone verified via OTP</div>
+      <div class="check-row"><div class="check-mark done">✓</div>Documents submitted</div>
+      <div class="check-row wait"><div class="check-mark wait">…</div>Admin review <span id="reviewState" style="margin-left:auto;color:var(--text-low);">pending</span></div>
+    </div>
+    <div class="foot-note">You can browse the platform now, but deposits and withdrawals unlock once you're verified.</div>
+  `;
+}
+
+function viewVerified(){
+  return `
+    <div class="status-center">
+      <div class="status-icon verified">✓</div>
+      <h2>You're verified</h2>
+      <div class="desc">Your identity was approved by our compliance team. You're all set to deposit and start playing.</div>
+    </div>
+    <button class="btn">Go to wallet</button>
+    <div class="foot-note">Play responsibly — set a deposit limit any time from Account settings.</div>
+  `;
+}
+
+function bindEvents(step){
+  if(step==='register'){
+    const check=()=>{
+      const ok = document.getElementById('rName').value.trim() &&
+                 document.getElementById('rEmail').value.includes('@') &&
+                 document.getElementById('rPhone').value.trim().length>=9 &&
+                 document.getElementById('rPass').value.length>=8 &&
+                 document.getElementById('rPass').value===document.getElementById('rPass2').value;
+      document.getElementById('rBtn').disabled=!ok;
+    };
+    ['rName','rEmail','rPhone','rPass','rPass2'].forEach(id=>document.getElementById(id).addEventListener('input',check));
+    document.getElementById('rBtn').addEventListener('click',()=>{
+      userData.name=document.getElementById('rName').value;
+      userData.email=document.getElementById('rEmail').value;
+      userData.phone=document.getElementById('rPhone').value;
+      goTo('phone_otp');
+    });
+  }
+  if(step==='email_otp' || step==='phone_otp'){
+    const digits=[...document.querySelectorAll('.otpDigit')];
+    digits[0].focus();
+    digits.forEach((d,i)=>{
+      d.addEventListener('input',()=>{
+        d.value=d.value.replace(/[^0-9]/g,'');
+        if(d.value && i<5) digits[i+1].focus();
+        checkOtp();
+      });
+      d.addEventListener('keydown',(e)=>{
+        if(e.key==='Backspace' && !d.value && i>0) digits[i-1].focus();
+      });
+    });
+    function checkOtp(){
+      const code=digits.map(d=>d.value).join('');
+      const btn=document.getElementById('otpBtn');
+      const hint=document.getElementById('otpHint');
+      if(code.length===6){
+        if(code==='482913'){
+          btn.disabled=false;
+          hint.className='hint';
+          hint.innerHTML='Code confirmed.';
+        } else {
+          btn.disabled=true;
+          hint.className='hint err';
+          hint.innerHTML='Incorrect code — try 482913 (demo).';
+        }
+      } else {
+        btn.disabled=true;
+      }
+    }
+    document.getElementById('otpBtn').addEventListener('click',()=>{
+      goTo('kyc');
+    });
+    document.getElementById('resendLink').addEventListener('click',(e)=>{
+      e.target.textContent='Code resent ✓';
+      setTimeout(()=>{ e.target.textContent='Resend code'; },1800);
+    });
+  }
+  if(step==='kyc'){
+    const dobInput=document.getElementById('kDob');
+    const dobHint=document.getElementById('dobHint');
+    const idNumInput=document.getElementById('kIdNum');
+    const idNumHint=document.getElementById('idNumHint');
+    const boxId=document.getElementById('boxId');
+    const boxSelfie=document.getElementById('boxSelfie');
+    const btn=document.getElementById('kycBtn');
+    let idNumOk=false;
+    function refresh(){
+      let dobOk=false;
+      if(dobInput.value){
+        const age=(new Date().getTime()-new Date(dobInput.value).getTime())/(365.25*24*3600*1000);
+        if(age<18){ dobHint.className='hint err'; dobHint.textContent='You must be 18 or older to use BetCrash.'; }
+        else { dobHint.className='hint'; dobHint.textContent='Age verified.'; dobOk=true; }
+      }
+      btn.disabled = !(dobOk && idNumOk && userData.idDoc && userData.selfie);
+    }
+    function checkIdNumber(){
+      const raw=idNumInput.value.trim();
+      userData.idNumber=raw;
+      if(raw.length<6){
+        idNumOk=false;
+        idNumHint.className='hint';
+        idNumHint.textContent='One account per ID number — this is checked automatically.';
+      } else if(REGISTERED_ID_NUMBERS.includes(raw)){
+        idNumOk=false;
+        idNumHint.className='hint err';
+        idNumHint.innerHTML='This ID is already linked to an existing account. Duplicate accounts aren\'t allowed — <span class="link" id="loginInstead">log in instead</span> or contact support if this is a mistake.';
+        const li=document.getElementById('loginInstead');
+        if(li) li.addEventListener('click', ()=>{ idNumHint.textContent='Redirecting to login…'; });
+      } else {
+        idNumOk=true;
+        idNumHint.className='hint';
+        idNumHint.textContent='ID number available — no existing account found.';
+      }
+      refresh();
+    }
+    dobInput.addEventListener('change',refresh);
+    idNumInput.addEventListener('input',checkIdNumber);
+    boxId.addEventListener('click',()=>{
+      userData.idDoc=true;
+      boxId.classList.add('filled');
+      boxId.querySelector('.title').textContent='ID uploaded ✓';
+      boxId.querySelector('.sub').textContent='national_id_front.jpg';
+      refresh();
+    });
+    boxSelfie.addEventListener('click',()=>{
+      userData.selfie=true;
+      boxSelfie.classList.add('filled');
+      boxSelfie.querySelector('.title').textContent='Selfie captured ✓';
+      boxSelfie.querySelector('.sub').textContent='Liveness check passed';
+      refresh();
+    });
+    btn.addEventListener('click',()=>{
+      if(REGISTERED_ID_NUMBERS.includes(userData.idNumber)) return; // hard stop, belt and braces
+      REGISTERED_ID_NUMBERS.push(userData.idNumber); // this ID is now taken for the rest of the session
+      goTo('pending');
+      simulateAdminReview();
+    });
+  }
+}
+
+function simulateAdminReview(){
+  // simulates the admin approving on their end — see the companion Admin KYC Queue screen
+  setTimeout(()=>{
+    const el=document.getElementById('reviewState');
+    if(el){ el.textContent='in review'; el.style.color='var(--yellow)'; }
+  },1800);
+  setTimeout(()=>{
+    goTo('verified');
+  },4200);
+}
+
+renderStepper();
+render();
+</script>
+</body>
+</html>
