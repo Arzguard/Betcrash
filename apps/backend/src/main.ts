@@ -6,10 +6,19 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   const config = app.get(ConfigService);
   const port = config.get<number>('PORT', 3333);
+
+  // CORS: tokens travel in the Authorization header (not cookies), so credentials-free CORS is safe.
+  // In production, set FRONTEND_URL (comma-separated origins) to lock it down.
+  const frontendUrl = process.env.FRONTEND_URL;
+  app.enableCors({
+    origin: frontendUrl ? frontendUrl.split(',').map((s) => s.trim()) : '*',
+    credentials: false,
+  });
+
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('BetCrash API')

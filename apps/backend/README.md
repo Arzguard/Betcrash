@@ -31,3 +31,16 @@ This folder contains the NestJS backend for BetCrash.
 - `POST /auth/register`
 - `POST /auth/login`
 - `GET /auth/me`
+- `POST /auth/refresh`
+- `POST /auth/logout`
+
+## CORS
+
+The API is locked down by default. Set `FRONTEND_URL` (comma-separated origins) so the
+frontend deployed on Vercel can call the backend:
+
+```
+FRONTEND_URL=https://betcrash.vercel.app,https://betcrash-admin.vercel.app
+```
+
+When unset, all origins are allowed (dev convenience only).
