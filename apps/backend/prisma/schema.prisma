@@ -7,6 +7,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── Auth ───────────────────────────────────────────────────────────────────
+
 model User {
   id           String   @id @default(uuid())
   name         String
@@ -17,9 +19,127 @@ model User {
   role         Role     @default(USER)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  wallet       Wallet?
+  bets         Bet[]
+  kycSubmission KycSubmission?
 }
 
 enum Role {
   USER
   ADMIN
+}
+
+// ─── Wallet ──────────────────────────────────────────────────────────────────
+
+model Wallet {
+  id           String        @id @default(uuid())
+  userId       String        @unique
+  user         User          @relation(fields: [userId], references: [id])
+  balance      Decimal       @default(0) @db.Decimal(18, 2)
+  bonusBalance Decimal       @default(0) @db.Decimal(18, 2)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  transactions Transaction[]
+}
+
+model Transaction {
+  id          String            @id @default(uuid())
+  walletId    String
+  wallet      Wallet            @relation(fields: [walletId], references: [id])
+  type        TransactionType
+  amount      Decimal           @db.Decimal(18, 2)
+  status      TransactionStatus @default(PENDING)
+  reference   String?           @unique  // M-Pesa transaction ref
+  description String?
+  metadata    Json?             // e.g. { mpesaPhone, roundId, cashoutAt }
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  BET_STAKE
+  BET_WIN
+  BONUS_CREDIT
+  BONUS_DEBIT
+  REFUND
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REJECTED
+}
+
+// ─── Game ────────────────────────────────────────────────────────────────────
+
+model Round {
+  id           String      @id @default(uuid())
+  roundNumber  Int         @unique @default(autoincrement())
+  seed         String      // provably-fair server seed
+  serverHash   String      // SHA256(seed) — published before round
+  crashPoint   Decimal     @db.Decimal(8, 2)
+  status       RoundStatus @default(PENDING)
+  startedAt    DateTime?
+  crashedAt    DateTime?
+  createdAt    DateTime    @default(now())
+
+  bets         Bet[]
+}
+
+enum RoundStatus {
+  PENDING    // waiting for players
+  FLYING     // multiplier is climbing
+  CRASHED    // round ended
+}
+
+model Bet {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  roundId     String
+  round       Round     @relation(fields: [roundId], references: [id])
+  stake       Decimal   @db.Decimal(18, 2)
+  autoCashAt  Decimal?  @db.Decimal(8, 2)  // null = manual cashout
+  cashedOutAt Decimal?  @db.Decimal(8, 2)  // null if lost
+  profit      Decimal?  @db.Decimal(18, 2) // net P/L (negative = loss)
+  status      BetStatus @default(PLACED)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+enum BetStatus {
+  PLACED      // bet registered, round not yet started
+  ACTIVE      // round flying, player hasn't cashed out
+  WON
+  LOST
+}
+
+// ─── KYC ─────────────────────────────────────────────────────────────────────
+
+model KycSubmission {
+  id            String      @id @default(uuid())
+  userId        String      @unique
+  user          User        @relation(fields: [userId], references: [id])
+  idNumber      String      @unique  // national ID / passport — enforces uniqueness
+  dateOfBirth   DateTime
+  idDocumentUrl String?     // object-storage path
+  selfieUrl     String?
+  idMatchScore  Int?        // face match % from liveness check
+  status        KycStatus   @default(PENDING)
+  reviewedBy    String?     // admin user ID
+  reviewedAt    DateTime?
+  rejectReason  String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+enum KycStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }

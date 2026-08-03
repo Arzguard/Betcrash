@@ -462,6 +462,7 @@ function bindEvents(step){
     function refresh(){
       let dobOk=false;
       if(dobInput.value){
+        userData.dob = dobInput.value; // capture for API call
         const age=(new Date().getTime()-new Date(dobInput.value).getTime())/(365.25*24*3600*1000);
         if(age<18){ dobHint.className='hint err'; dobHint.textContent='You must be 18 or older to use BetCrash.'; }
         else { dobHint.className='hint'; dobHint.textContent='Age verified.'; dobOk=true; }
@@ -504,24 +505,50 @@ function bindEvents(step){
       boxSelfie.querySelector('.sub').textContent='Liveness check passed';
       refresh();
     });
-    btn.addEventListener('click',()=>{
-      if(REGISTERED_ID_NUMBERS.includes(userData.idNumber)) return; // hard stop, belt and braces
-      REGISTERED_ID_NUMBERS.push(userData.idNumber); // this ID is now taken for the rest of the session
-      goTo('pending');
-      simulateAdminReview();
+    btn.addEventListener('click', async ()=>{
+      if(REGISTERED_ID_NUMBERS.includes(userData.idNumber)) return;
+      btn.disabled = true;
+      btn.textContent = 'Submitting…';
+      try {
+        await fetchJson(`${API_BASE}/kyc/submit`, {
+          method: 'POST',
+          body: JSON.stringify({
+            idNumber:    userData.idNumber,
+            dateOfBirth: userData.dob,
+            idDocumentUrl: null,  // file upload handled separately in production
+            selfieUrl:     null,
+          }),
+        });
+        REGISTERED_ID_NUMBERS.push(userData.idNumber);
+        goTo('pending');
+        pollKycStatus();
+      } catch(err) {
+        btn.disabled = false;
+        btn.textContent = 'Submit for verification';
+        idNumHint.className = 'hint err';
+        idNumHint.textContent = err.message || 'Submission failed — try again.';
+      }
     });
   }
 }
 
-function simulateAdminReview(){
-  // simulates the admin approving on their end — see the companion Admin KYC Queue screen
-  setTimeout(()=>{
-    const el=document.getElementById('reviewState');
-    if(el){ el.textContent='in review'; el.style.color='var(--yellow)'; }
-  },1800);
-  setTimeout(()=>{
-    goTo('verified');
-  },4200);
+/** Poll GET /kyc/status every 5 s until approved/rejected */
+function pollKycStatus(){
+  const interval = setInterval(async ()=>{
+    try {
+      const data = await fetchJson(`${API_BASE}/kyc/status`);
+      const stateEl = document.getElementById('reviewState');
+      if(data.status === 'APPROVED'){
+        clearInterval(interval);
+        goTo('verified');
+      } else if(data.status === 'REJECTED'){
+        clearInterval(interval);
+        if(stateEl){ stateEl.textContent='rejected'; stateEl.style.color='var(--red)'; }
+      } else if(data.status === 'PENDING'){
+        if(stateEl){ stateEl.textContent='in review'; stateEl.style.color='var(--yellow)'; }
+      }
+    } catch(_){}
+  }, 5000);
 }
 
 renderStepper();

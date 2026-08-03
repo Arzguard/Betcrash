@@ -243,18 +243,17 @@
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
     <h2>Admin access</h2>
-    <p>Sign in with the BetCrash admin credentials to open the control panel.</p>
+    <p>Sign in with your BetCrash admin account credentials.</p>
     <div class="login-row">
       <label for="adminEmail">Email</label>
-      <input id="adminEmail" type="email" value="betcrash@gmail.com" autocomplete="email" />
+      <input id="adminEmail" type="email" autocomplete="email" />
     </div>
     <div class="login-row">
       <label for="adminPassword">Password</label>
-      <input id="adminPassword" type="password" value="Timmadollar" autocomplete="current-password" />
+      <input id="adminPassword" type="password" autocomplete="current-password" />
     </div>
     <button id="loginBtn">Sign in</button>
     <div class="login-error" id="loginError"></div>
-    <div class="login-hint">Demo mode: the provided credentials unlock the admin dashboard directly.</div>
   </div>
 </div>
 
@@ -381,6 +380,7 @@
 </div>
 
 <script>
+const API_BASE = 'http://localhost:3333';
 const loginScreen = document.getElementById('loginScreen');
 const appShell = document.getElementById('appShell');
 const loginBtn = document.getElementById('loginBtn');
@@ -388,18 +388,134 @@ const loginError = document.getElementById('loginError');
 const adminEmail = document.getElementById('adminEmail');
 const adminPassword = document.getElementById('adminPassword');
 
-function unlockAdmin() {
-  const email = (adminEmail.value || '').trim().toLowerCase();
-  const password = (adminPassword.value || '').trim();
+// ── Auth helpers ───────────────────────────────────────────────────────────
 
-  if (email === 'betcrash@gmail.com' && password === 'Timmadollar') {
-    loginScreen.classList.add('hidden');
-    appShell.classList.remove('hidden');
-    loginError.textContent = '';
-  } else {
-    loginError.textContent = 'Invalid email or password.';
+function getToken() { return localStorage.getItem('adminAccessToken'); }
+function getRefresh() { return localStorage.getItem('adminRefreshToken'); }
+function saveTokens(access, refresh) {
+  localStorage.setItem('adminAccessToken', access);
+  if (refresh) localStorage.setItem('adminRefreshToken', refresh);
+}
+function clearTokens() {
+  localStorage.removeItem('adminAccessToken');
+  localStorage.removeItem('adminRefreshToken');
+}
+
+async function apiFetch(path, opts = {}) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...opts,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}),
+      ...(opts.headers || {}),
+    },
+  });
+
+  if (res.status === 401) {
+    // Try refresh once
+    const refresh = getRefresh();
+    if (refresh) {
+      const r = await fetch(`${API_BASE}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: refresh }),
+      });
+      if (r.ok) {
+        const data = await r.json();
+        saveTokens(data.accessToken, data.refreshToken);
+        // Retry original request
+        return apiFetch(path, opts);
+      }
+    }
+    clearTokens();
+    showLogin();
+    throw new Error('Session expired');
+  }
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || res.statusText);
+  }
+
+  return res.json().catch(() => null);
+}
+
+function showLogin() {
+  loginScreen.classList.remove('hidden');
+  appShell.classList.add('hidden');
+}
+
+function showDashboard(user) {
+  loginScreen.classList.add('hidden');
+  appShell.classList.remove('hidden');
+  // Update the "Signed in as" chip with real name/role
+  const whoEl = document.querySelector('.admin-chip .who');
+  const roleEl = document.querySelector('.admin-chip .role');
+  if (whoEl) whoEl.textContent = user.name || user.email;
+  if (roleEl) roleEl.textContent = user.role;
+}
+
+async function unlockAdmin() {
+  const email = (adminEmail.value || '').trim();
+  const password = (adminPassword.value || '').trim();
+  if (!email || !password) {
+    loginError.textContent = 'Enter your email and password.';
+    return;
+  }
+
+  loginBtn.disabled = true;
+  loginBtn.textContent = 'Signing in…';
+  loginError.textContent = '';
+
+  try {
+    // 1. Login
+    const res = await fetch(`${API_BASE}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Invalid credentials');
+    }
+
+    const data = await res.json();
+    saveTokens(data.accessToken, data.refreshToken);
+
+    // 2. Verify ADMIN role — reject USER tokens
+    if (!data.user || data.user.role !== 'ADMIN') {
+      clearTokens();
+      throw new Error('Access denied — admin account required.');
+    }
+
+    showDashboard(data.user);
+    loadDashboardData();
+
+  } catch (err) {
+    loginError.textContent = err.message || 'Login failed';
+    clearTokens();
+  } finally {
+    loginBtn.disabled = false;
+    loginBtn.textContent = 'Sign in';
   }
 }
+
+// On page load — restore session if token exists
+(async () => {
+  if (getToken()) {
+    try {
+      const me = await apiFetch('/auth/me');
+      if (me && me.role === 'ADMIN') {
+        showDashboard(me);
+        loadDashboardData();
+        return;
+      }
+    } catch (_) {}
+    clearTokens();
+  }
+  showLogin();
+})();
 
 loginBtn.addEventListener('click', unlockAdmin);
 [adminEmail, adminPassword].forEach((input) => {
@@ -408,7 +524,45 @@ loginBtn.addEventListener('click', unlockAdmin);
   });
 });
 
-// ---- Live rounds monitor ----
+// ── Dashboard data (fetches from API, falls back to mock) ─────────────────
+
+async function loadDashboardData() {
+  try {
+    const history = await apiFetch('/game/round/history');
+    if (history && history.length) renderRoundsFromApi(history);
+  } catch (_) {
+    renderRoundsMock();
+  }
+
+  try {
+    const kycQueue = await apiFetch('/kyc/queue?status=PENDING');
+    if (kycQueue) updateKycCount(kycQueue.length);
+  } catch (_) {}
+}
+
+function renderRoundsFromApi(history) {
+  document.getElementById('roundsList').innerHTML = history.slice(0, 4).map((r, i) => `
+    <div class="round-row">
+      <div class="rid">#${r.roundNumber}</div>
+      <div class="bar-wrap"><div class="bar" style="width:100%;background:var(--panel-line)"></div></div>
+      <div class="mult crashed">${parseFloat(r.crashPoint).toFixed(2)}x</div>
+      <div>—</div>
+      <div><span class="status-badge crashed">Crashed</span></div>
+    </div>
+  `).join('');
+}
+
+function updateKycCount(count) {
+  document.querySelectorAll('.nav-item').forEach(el => {
+    if (el.textContent.includes('KYC queue')) {
+      const badge = el.querySelector('.count');
+      if (badge) badge.textContent = count;
+    }
+  });
+}
+
+// ---- Live rounds monitor (mock fallback) ----
+function renderRoundsMock() {
 const rounds=[
   {id:10483, mult:2.14, live:true, bets:'218,400', pct:38},
   {id:10482, mult:14.20, live:false, bets:'96,200', pct:100},
@@ -424,6 +578,7 @@ document.getElementById('roundsList').innerHTML = rounds.map(r=>`
     <div><span class="status-badge ${r.live?'live':'crashed'}">${r.live?'Live':'Crashed'}</span></div>
   </div>
 `).join('');
+} // end renderRoundsMock
 
 // ---- Activity feed ----
 const activity=[

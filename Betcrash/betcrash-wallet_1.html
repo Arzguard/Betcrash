@@ -205,40 +205,101 @@
 <div class="toast" id="toast"><span class="dot"></span><span id="toastText"></span></div>
 
 <script>
-let wallet=12450;
-let currentTab='deposit';
-let mpesaPhone='0712 345 678';
+const API_BASE = 'http://localhost:3333';
 
-// tiered withdrawal policy
-const AUTO_APPROVE_LIMIT=10000;
-const user={ kycVerified:true, accountAgeDays:64, riskFlagged:false };
+// ── Auth helpers (mirror onboarding pattern) ─────────────────────────────
+function getToken()  { return localStorage.getItem('betcrashAccessToken'); }
+function getRefresh(){ return localStorage.getItem('betcrashRefreshToken'); }
+function saveTokens(a, r){ localStorage.setItem('betcrashAccessToken', a); if(r) localStorage.setItem('betcrashRefreshToken', r); }
 
-const transactions=[
-  {type:'deposit', title:'M-Pesa deposit', sub:'Ref MPE7X92KL1', amt:2000, status:'completed', time:'Today, 14:22'},
-  {type:'bet', win:true, title:'Cashed out at 3.42x', sub:'Round #10481', amt:684, status:'completed', time:'Today, 13:58'},
-  {type:'bet', win:false, title:'Round crashed at 1.08x', sub:'Round #10479', amt:-200, status:'completed', time:'Today, 13:41'},
-  {type:'withdraw', title:'Withdrawal to M-Pesa', sub:'Ref MPE7X88NQ4', amt:-15000, status:'pending', time:'Today, 12:15'},
-  {type:'withdraw', title:'Withdrawal to M-Pesa', sub:'Ref MPE7X61FR2', amt:-3200, status:'completed', time:'Today, 09:40'},
-  {type:'bonus', title:'Welcome bonus credited', sub:'Wagering requirement applies', amt:500, status:'completed', time:'Yesterday, 19:04'},
-  {type:'deposit', title:'M-Pesa deposit', sub:'Ref MPE7W41TZ9', amt:5000, status:'completed', time:'Yesterday, 18:50'},
-  {type:'withdraw', title:'Withdrawal to M-Pesa', sub:'Ref MPE7V02BC3', amt:-1500, status:'failed', time:'2 days ago'},
-];
+async function apiFetch(path, opts = {}){
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...opts,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}),
+      ...(opts.headers||{}),
+    },
+  });
+  if(res.status === 401){
+    const refresh = getRefresh();
+    if(refresh){
+      const r = await fetch(`${API_BASE}/auth/refresh`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ refreshToken: refresh }),
+      });
+      if(r.ok){ const d = await r.json(); saveTokens(d.accessToken, d.refreshToken); return apiFetch(path, opts); }
+    }
+    window.location.href = '/onboarding';
+    throw new Error('Unauthenticated');
+  }
+  if(!res.ok){ const e = await res.json().catch(()=>({})); throw new Error(e.message || res.statusText); }
+  return res.json().catch(()=>null);
+}
+
+// ── State ────────────────────────────────────────────────────────────────
+let wallet = 0;
+let currentTab = 'deposit';
+let mpesaPhone = '';
+const AUTO_APPROVE_LIMIT = 10000;
+
+// ── Load real balance + transactions from API ─────────────────────────────
+async function loadWallet(){
+  try {
+    const [bal, txs] = await Promise.all([
+      apiFetch('/wallet/balance'),
+      apiFetch('/wallet/transactions'),
+    ]);
+    wallet = parseFloat(bal.balance);
+    document.getElementById('mainBal').textContent = fmt(wallet);
+    document.getElementById('bonusBal').textContent = fmt(parseFloat(bal.bonusBalance));
+    renderTxFromApi(txs || []);
+    renderPanel();
+  } catch(err){
+    console.warn('Wallet load failed, using offline view:', err.message);
+    renderTxMock();
+    renderPanel();
+  }
+}
+
+function renderTxFromApi(txs){
+  const el = document.getElementById('txList');
+  const iconMap = { DEPOSIT:'↓', WITHDRAWAL:'↑', BET_STAKE:'▼', BET_WIN:'▲', BONUS_CREDIT:'★', BONUS_DEBIT:'★', REFUND:'↩' };
+  const classMap = { DEPOSIT:'deposit', WITHDRAWAL:'withdraw', BET_STAKE:'loss', BET_WIN:'win', BONUS_CREDIT:'bonus', BONUS_DEBIT:'bonus', REFUND:'deposit' };
+  const statusMap = { COMPLETED:'completed', PENDING:'pending', FAILED:'failed', REJECTED:'failed' };
+  el.innerHTML = txs.slice(0, 30).map(t => {
+    const amt = ['WITHDRAWAL','BET_STAKE','BONUS_DEBIT'].includes(t.type) ? -Math.abs(t.amount) : Math.abs(t.amount);
+    return `
+    <div class="tx-row">
+      <div class="tx-icon ${classMap[t.type]||'deposit'}">${iconMap[t.type]||'·'}</div>
+      <div class="tx-main">
+        <div class="title">${t.description || t.type}</div>
+        <div class="sub">${t.reference||''} · ${new Date(t.createdAt).toLocaleString()}</div>
+      </div>
+      <div class="tx-amt ${amt>=0?'pos':'neg'}">${fmt(amt)}</div>
+      <div class="tx-status ${statusMap[t.status]||'pending'}">${(t.status||'').toLowerCase()}</div>
+    </div>`;
+  }).join('') || '<div style="color:var(--text-low);padding:16px 0;font-size:13px;">No transactions yet.</div>';
+}
 
 function fmt(n){ return (n<0?'-':'') + 'KES ' + Math.abs(Math.round(n)).toLocaleString(); }
 
-function renderTx(filter='all'){
+// ── Mock tx fallback (no auth / API down) ─────────────────────────────────
+function renderTxMock(filter='all'){
+  const mockTxs=[
+    {type:'deposit', title:'M-Pesa deposit', sub:'Ref MPE7X92KL1', amt:2000, status:'completed', time:'Today, 14:22'},
+    {type:'bet', win:true, title:'Cashed out at 3.42x', sub:'Round #10481', amt:684, status:'completed', time:'Today, 13:58'},
+    {type:'bet', win:false, title:'Round crashed at 1.08x', sub:'Round #10479', amt:-200, status:'completed', time:'Today, 13:41'},
+    {type:'withdraw', title:'Withdrawal to M-Pesa', sub:'Ref MPE7X88NQ4', amt:-15000, status:'pending', time:'Today, 12:15'},
+    {type:'bonus', title:'Welcome bonus credited', sub:'Wagering requirement', amt:500, status:'completed', time:'Yesterday, 19:04'},
+  ];
   const el=document.getElementById('txList');
   const icons={deposit:'↓',withdraw:'↑',win:'▲',loss:'▼',bonus:'★'};
-  const filtered=transactions.filter(t=>{
-    if(filter==='all') return true;
-    if(filter==='bet') return t.type==='bet';
-    return t.type===filter;
-  });
+  const filtered=mockTxs.filter(t=>filter==='all'||t.type===filter||( filter==='bet'&&t.type==='bet'));
   el.innerHTML=filtered.map(t=>{
-    const iconClass = t.type==='bet' ? (t.win?'win':'loss') : t.type;
-    const icon = t.type==='bet' ? (t.win?icons.win:icons.loss) : icons[t.type];
-    return `
-    <div class="tx-row">
+    const iconClass=t.type==='bet'?(t.win?'win':'loss'):t.type;
+    const icon=t.type==='bet'?(t.win?icons.win:icons.loss):icons[t.type];
+    return `<div class="tx-row">
       <div class="tx-icon ${iconClass}">${icon}</div>
       <div class="tx-main"><div class="title">${t.title}</div><div class="sub">${t.sub} · ${t.time}</div></div>
       <div class="tx-amt ${t.amt>0?'pos':'neg'}">${fmt(t.amt)}</div>
@@ -246,7 +307,8 @@ function renderTx(filter='all'){
     </div>`;
   }).join('');
 }
-renderTx();
+
+function renderTx(filter='all'){ renderTxMock(filter); }
 
 document.querySelectorAll('.tx-filters button').forEach(b=>{
   b.addEventListener('click',()=>{
@@ -298,31 +360,59 @@ function bindDeposit(){
   });
 }
 
-function runStkFlow(amount, phone){
+async function runStkFlow(amount, phone){
   const panel=document.getElementById('actionPanel');
   panel.innerHTML = `
     <div class="stk-status">
       <div class="stk-icon wait pulse">📲</div>
       <div class="stk-title">Check your phone</div>
-      <div class="stk-desc">We've sent an M-Pesa prompt to <b style="color:var(--text-hi)">${phone}</b> for <b style="color:var(--text-hi)">${fmt(amount)}</b>. Enter your M-Pesa PIN to complete the deposit.</div>
-    </div>
-  `;
-  setTimeout(()=>{
-    wallet += amount;
-    document.getElementById('mainBal').textContent = fmt(wallet);
-    transactions.unshift({type:'deposit', title:'M-Pesa deposit', sub:'Ref MPE'+Math.random().toString(36).slice(2,9).toUpperCase(), amt:amount, status:'completed', time:'Just now'});
-    renderTx(document.querySelector('.tx-filters button.active').dataset.f);
+      <div class="stk-desc">Sending M-Pesa prompt to <b style="color:var(--text-hi)">${phone}</b> for <b style="color:var(--text-hi)">${fmt(amount)}</b>.</div>
+    </div>`;
+
+  try {
+    await apiFetch('/wallet/deposit', {
+      method: 'POST',
+      body: JSON.stringify({ amount, mpesaPhone: phone.replace(/\s/g,'') }),
+    });
+
     panel.innerHTML = `
       <div class="stk-status">
-        <div class="stk-icon ok">✓</div>
-        <div class="stk-title">Deposit successful</div>
-        <div class="stk-desc">${fmt(amount)} has been added to your wallet and is ready to bet with.</div>
-        <button class="btn deposit" id="depAgainBtn">Make another deposit</button>
-      </div>
-    `;
+        <div class="stk-icon wait pulse">📲</div>
+        <div class="stk-title">Check your phone</div>
+        <div class="stk-desc">M-Pesa prompt sent to <b style="color:var(--text-hi)">${phone}</b>. Enter your PIN to complete the deposit. Balance updates automatically when confirmed.</div>
+        <button class="btn deposit" id="depAgainBtn" style="margin-top:16px;">Make another deposit</button>
+      </div>`;
     document.getElementById('depAgainBtn').addEventListener('click', renderPanel);
-    showToast(`Deposit confirmed — ${fmt(amount)} added to wallet`);
-  }, 2600);
+    showToast(`STK Push sent — check your phone for the M-Pesa prompt`);
+
+    // Poll balance for up to 60 s waiting for Safaricom callback
+    let polls = 0;
+    const poller = setInterval(async ()=>{
+      polls++;
+      try {
+        const bal = await apiFetch('/wallet/balance');
+        const newBal = parseFloat(bal.balance);
+        if(newBal !== wallet){
+          wallet = newBal;
+          document.getElementById('mainBal').textContent = fmt(wallet);
+          showToast(`Deposit confirmed — ${fmt(amount)} added to wallet`);
+          loadWallet();
+          clearInterval(poller);
+        }
+      } catch(_){}
+      if(polls >= 12) clearInterval(poller); // stop after 60 s
+    }, 5000);
+
+  } catch(err){
+    panel.innerHTML = `
+      <div class="stk-status">
+        <div class="stk-icon" style="background:var(--red-dim);color:var(--red)">✕</div>
+        <div class="stk-title">Deposit failed</div>
+        <div class="stk-desc">${err.message || 'Something went wrong. Please try again.'}</div>
+        <button class="btn deposit" id="depAgainBtn" style="margin-top:16px;">Try again</button>
+      </div>`;
+    document.getElementById('depAgainBtn').addEventListener('click', renderPanel);
+  }
 }
 
 // ---------- Withdraw panel ----------
@@ -373,46 +463,34 @@ function bindWithdraw(){
   }
   amt.addEventListener('input', validate);
   validate();
-  document.getElementById('wdBtn').addEventListener('click',()=>{
+  document.getElementById('wdBtn').addEventListener('click', async ()=>{
     const value=parseInt(amt.value)||0;
-    const instant=willAutoApprove(value);
-    wallet-=value;
-    document.getElementById('mainBal').textContent=fmt(wallet);
-    transactions.unshift({type:'withdraw', title:'Withdrawal to M-Pesa', sub:'Ref MPE'+Math.random().toString(36).slice(2,9).toUpperCase(), amt:-value, status: instant?'completed':'pending', time:'Just now'});
-    renderTx(document.querySelector('.tx-filters button.active').dataset.f);
+    const wdBtn = document.getElementById('wdBtn');
+    wdBtn.disabled = true;
+    wdBtn.textContent = 'Processing…';
     const panel=document.getElementById('actionPanel');
-
-    if(instant){
+    try {
+      const result = await apiFetch('/wallet/withdraw', {
+        method: 'POST',
+        body: JSON.stringify({ amount: value, mpesaPhone: mpesaPhone.replace(/\s/g,'') }),
+      });
+      wallet -= value;
+      document.getElementById('mainBal').textContent = fmt(wallet);
+      const instant = result.status === 'instant';
       panel.innerHTML = `
         <div class="stk-status">
-          <div class="stk-icon wait pulse">📤</div>
-          <div class="stk-title">Sending to M-Pesa…</div>
-          <div class="stk-desc">${fmt(value)} is being sent to <b style="color:var(--text-hi)">${mpesaPhone}</b>.</div>
-        </div>
-      `;
-      setTimeout(()=>{
-        panel.innerHTML = `
-          <div class="stk-status">
-            <div class="stk-icon ok">✓</div>
-            <div class="stk-title">Withdrawal sent</div>
-            <div class="stk-desc">${fmt(value)} has landed on <b style="color:var(--text-hi)">${mpesaPhone}</b>. Under the instant limit, so no review was needed.</div>
-            <button class="btn withdraw" id="wdAgainBtn">Back to wallet</button>
-          </div>
-        `;
-        document.getElementById('wdAgainBtn').addEventListener('click', renderPanel);
-        showToast(`Withdrawal complete — ${fmt(value)} sent instantly`);
-      }, 1400);
-    } else {
-      panel.innerHTML = `
-        <div class="stk-status">
-          <div class="stk-icon wait">⏳</div>
-          <div class="stk-title">Withdrawal held for review</div>
-          <div class="stk-desc">${fmt(value)} is over the ${fmt(AUTO_APPROVE_LIMIT)} instant limit, so it's been sent to our compliance team for a quick manual check. You'll get a notification the moment it's approved — usually within a few minutes.</div>
-          <button class="btn withdraw" id="wdAgainBtn">Back to wallet</button>
-        </div>
-      `;
-      document.getElementById('wdAgainBtn').addEventListener('click', renderPanel);
-      showToast('Withdrawal held for admin review — over instant limit');
+          <div class="stk-icon ${instant?'ok':'wait'}">${instant?'✓':'⏳'}</div>
+          <div class="stk-title">${instant?'Withdrawal sent':'Withdrawal queued'}</div>
+          <div class="stk-desc">${result.message}</div>
+          <button class="btn withdraw" id="wdAgainBtn" style="margin-top:16px;">Back to wallet</button>
+        </div>`;
+      document.getElementById('wdAgainBtn').addEventListener('click', ()=>{ loadWallet(); renderPanel(); });
+      showToast(result.message);
+    } catch(err) {
+      wdBtn.disabled = false;
+      wdBtn.textContent = 'Request withdrawal';
+      hint.className = 'hint err';
+      hint.textContent = err.message || 'Withdrawal failed — try again.';
     }
   });
 }
@@ -436,7 +514,8 @@ document.getElementById('tabWithdraw').addEventListener('click',()=>{
   renderPanel();
 });
 
-renderPanel();
+// Boot — load real wallet data, fall back gracefully if unauthenticated
+loadWallet();
 </script>
 </body>
 </html>
