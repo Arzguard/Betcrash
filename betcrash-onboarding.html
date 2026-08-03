@@ -13,6 +13,8 @@
   <link rel="manifest" href="/favicon/site.webmanifest">
   <meta name="theme-color" content="#16123A">
   <meta name="color-scheme" content="dark">
+  <!-- Set this to your deployed BetCrash backend URL in production -->
+  <meta name="betcrash-api-url" content="">
   <meta name="msapplication-TileImage" content="/favicon/mstile-150x150.png">
   <meta name="msapplication-TileColor" content="#16123A">
   <meta property="og:title" content="BetCrash">
@@ -168,7 +170,25 @@
 <div class="card" id="card"></div>
 
 <script>
-const API_BASE = 'http://localhost:3333';
+(function () {
+  // Convert network-level fetch failures into a friendly, logged error
+  var _fetch = window.fetch.bind(window);
+  window.fetch = function (url, opts) {
+    return _fetch(url, opts).catch(function (err) {
+      console.error('[BetCrash] request to', String(url), 'failed:', err);
+      var e = new Error('Unable to connect to the server. The service may be temporarily unavailable — check your connection and try again.');
+      e.originalError = err;
+      throw e;
+    });
+  };
+})();
+const API_BASE = (function () {
+  var m = document.querySelector('meta[name="betcrash-api-url"]');
+  if (m && m.content && m.content.trim()) return m.content.trim();
+  if (window.BETCRASH_API_URL) return window.BETCRASH_API_URL;
+  if (['localhost', '127.0.0.1', '::1'].indexOf(location.hostname) >= 0) return 'http://localhost:3333';
+  return '';
+})();
 const STEPS=['register','phone_otp','kyc','pending','verified'];
 let stepIdx=0;
 let userData={name:'',email:'',phone:'',password:'',dob:'',idNumber:'',idDoc:false,selfie:false};

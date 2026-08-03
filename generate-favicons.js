@@ -10,7 +10,7 @@ const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
 
-const faviconDir = path.join(__dirname, 'public', 'favicon');
+const faviconDir = path.join(__dirname, 'favicon');
 const svgPath = path.join(faviconDir, 'favicon.svg');
 const svgBuffer = fs.readFileSync(svgPath);
 

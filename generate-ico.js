@@ -5,7 +5,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const faviconDir = path.join(__dirname, 'public', 'favicon');
+const faviconDir = path.join(__dirname, 'favicon');
 
 const sizes = [16, 32, 48];
 const pngBuffers = sizes.map(s =>
