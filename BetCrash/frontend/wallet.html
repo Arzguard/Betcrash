@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BetCrash — Wallet</title>
+  <link rel="shortcut icon" href="/favicon/favicon.ico">
+  <link rel="icon" href="/favicon/favicon.svg" type="image/svg+xml">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon/favicon-48x48.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/favicon/site.webmanifest">
+  <meta name="theme-color" content="#16123A">
+  <meta name="color-scheme" content="dark">
+  <!-- Set this to your deployed BetCrash backend URL in production -->
+  <meta name="betcrash-api-url" content="">
+  <meta name="msapplication-TileImage" content="/favicon/mstile-150x150.png">
+  <meta name="msapplication-TileColor" content="#16123A">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta property="og:title" content="BetCrash">
+  <meta property="og:description" content="Premium crash gaming">
+  <meta property="og:image" content="/favicon/og-image.png">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="BetCrash">
+  <meta name="twitter:description" content="Premium crash gaming">
+  <meta name="twitter:image" content="/favicon/og-image.png">
+  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#38F29F">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+  --void:#16123A; --panel:#2A236B; --panel-raised:#211B55; --panel-line:#39327E;
+  --green:#38F29F; --green-dim:rgba(56,242,159,0.14);
+  --yellow:#FFD24A; --yellow-dim:rgba(255,210,74,0.13);
+  --red:#FF4D6D; --red-dim:rgba(255,77,109,0.14);
+  --text-hi:#FFFFFF; --text-mid:#A8A4D6; --text-low:#706A9B;
+}
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:radial-gradient(120% 140% at 15% -10%, #211B55 0%, #16123A 55%);color:var(--text-hi);font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+  ::selection{background:var(--yellow);color:var(--void);}
+  .panel:hover,.balance-card:hover,.bet-card:hover,.players:hover{box-shadow:0 8px 24px rgba(0,0,0,.25);transform:translateY(-1px);transition:transform .15s ease,box-shadow .15s ease;}
+  input:focus,textarea:focus{outline:none;border-color:var(--green)!important;box-shadow:0 0 0 3px rgba(56,242,159,.18);}
+  .btn:active{transform:scale(.97);transition:transform .12s ease;}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;border-bottom:1px solid var(--panel-line);background:rgba(14,12,43,0.7);backdrop-filter:blur(6px);position:sticky;top:0;z-index:20;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-mark{width:34px;height:34px;border-radius:10px;background:transparent;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .brand-mark img{width:34px;height:34px;object-fit:contain;}
+  .brand-name{font-family:'Space Grotesk';font-weight:700;font-size:17px;}
+  .brand-name span{color:var(--yellow);}
+  .avatar{width:32px;height:32px;border-radius:9px;background:var(--panel-raised);border:1px solid var(--panel-line);}
+
+  .layout{max-width:1080px;margin:0 auto;width:100%;padding:22px 22px 60px;}
+  .topline{margin-bottom:18px;}
+  .topline h1{font-family:'Space Grotesk';font-size:21px;margin:0;font-weight:700;}
+  .topline .sub{font-size:12.5px;color:var(--text-mid);margin-top:3px;}
+
+  /* balance cards */
+  .balance-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:14px;margin-bottom:20px;}
+  @media (max-width:760px){ .balance-grid{grid-template-columns:1fr;} }
+  .balance-card{background:var(--panel);border:1px solid var(--panel-line);border-radius:16px;padding:20px;position:relative;overflow:hidden;}
+  .balance-card.main{border-color:rgba(51,226,138,0.35);}
+  .balance-card .label{font-size:11px;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.07em;font-weight:600;}
+  .balance-card .value{font-family:'Space Grotesk';font-size:30px;font-weight:700;margin-top:8px;}
+  .balance-card.main .value{color:var(--green);}
+  .balance-card .foot{font-size:11.5px;color:var(--text-low);margin-top:8px;font-family:'JetBrains Mono';}
+  .balance-card .glow{position:absolute;width:140px;height:140px;background:var(--green);opacity:0.08;border-radius:50%;top:-60px;right:-40px;filter:blur(10px);}
+
+  /* tabs */
+  .tabs{display:flex;background:var(--panel);border:1px solid var(--panel-line);border-radius:12px;padding:4px;margin-bottom:16px;max-width:340px;}
+  .tabs button{flex:1;padding:10px;border:none;background:transparent;color:var(--text-mid);font-family:'Space Grotesk';font-weight:600;font-size:13px;border-radius:9px;cursor:pointer;}
+  .tabs button.active{background:var(--panel-raised);color:var(--text-hi);}
+
+  .content-grid{display:grid;grid-template-columns:380px 1fr;gap:16px;}
+  @media (max-width:900px){ .content-grid{grid-template-columns:1fr;} }
+
+  .panel{background:var(--panel);border:1px solid var(--panel-line);border-radius:16px;padding:20px;}
+  .panel h3{font-family:'Space Grotesk';font-size:14.5px;margin:0 0 14px;font-weight:700;}
+
+  label{font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-mid);font-weight:600;display:block;margin-bottom:6px;}
+  .field{margin-bottom:14px;}
+  .amount-row{display:flex;align-items:center;background:var(--void);border:1px solid var(--panel-line);border-radius:10px;overflow:hidden;}
+  .amount-row .prefix{padding:0 0 0 12px;color:var(--text-mid);font-family:'JetBrains Mono';font-size:14px;}
+  .amount-row input{flex:1;background:transparent;border:none;color:var(--text-hi);font-family:'JetBrains Mono';font-weight:700;font-size:17px;padding:11px 12px;outline:none;width:0;}
+  input.phone-input{width:100%;background:var(--void);border:1px solid var(--panel-line);border-radius:10px;padding:11px 12px;color:var(--text-hi);font-family:'JetBrains Mono';font-size:14px;outline:none;}
+  .quick-amts{display:flex;gap:6px;margin-bottom:14px;}
+  .quick-amts button{flex:1;background:var(--panel-raised);border:1px solid var(--panel-line);color:var(--text-mid);border-radius:8px;padding:8px 0;font-family:'JetBrains Mono';font-size:12px;cursor:pointer;}
+  .quick-amts button:hover{color:var(--text-hi);border-color:var(--green);}
+
+  .hint{font-size:11.5px;color:var(--text-low);margin-top:5px;}
+  .hint.err{color:var(--red);}
+
+  .btn{width:100%;padding:13px;border:none;border-radius:10px;font-family:'Space Grotesk';font-weight:700;font-size:14.5px;cursor:pointer;margin-top:4px;}
+  .btn.deposit{background:var(--green);color:#062616;}
+  .btn.withdraw{background:var(--yellow);color:#3B2900;}
+  .btn:disabled{background:var(--panel-raised);color:var(--text-low);cursor:not-allowed;}
+
+  .mpesa-badge{display:flex;align-items:center;gap:8px;background:var(--void);border:1px solid var(--panel-line);border-radius:9px;padding:9px 12px;margin-bottom:14px;font-size:12px;color:var(--text-mid);}
+  .mpesa-dot{width:8px;height:8px;border-radius:2px;background:var(--green);}
+
+  /* stk push state */
+  .stk-status{text-align:center;padding:16px 4px 4px;}
+  .stk-icon{width:56px;height:56px;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+  .stk-icon.wait{background:var(--yellow-dim);color:var(--yellow);}
+  .stk-icon.ok{background:var(--green-dim);color:var(--green);}
+  .stk-title{font-family:'Space Grotesk';font-weight:700;font-size:15px;margin-bottom:6px;}
+  .stk-desc{font-size:12.5px;color:var(--text-mid);line-height:1.5;margin-bottom:16px;}
+  .pulse{animation:pulse 1.4s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+
+  /* transactions */
+  .tx-filters{display:flex;gap:6px;margin-bottom:12px;}
+  .tx-filters button{background:var(--panel-raised);border:1px solid var(--panel-line);color:var(--text-mid);border-radius:8px;padding:6px 12px;font-size:11.5px;font-family:'JetBrains Mono';cursor:pointer;}
+  .tx-filters button.active{color:var(--text-hi);border-color:var(--green);}
+  .tx-row{display:grid;grid-template-columns:34px 1fr auto auto;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--panel-line);}
+  .tx-row:last-child{border-bottom:none;}
+  .tx-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;flex:0 0 auto;}
+  .tx-icon.deposit{background:var(--green-dim);color:var(--green);}
+  .tx-icon.withdraw{background:var(--yellow-dim);color:var(--yellow);}
+  .tx-icon.win{background:var(--green-dim);color:var(--green);}
+  .tx-icon.loss{background:var(--red-dim);color:var(--red);}
+  .tx-icon.bonus{background:var(--yellow-dim);color:var(--yellow);}
+  .tx-main .title{font-size:13px;font-weight:600;}
+  .tx-main .sub{font-size:11px;color:var(--text-low);font-family:'JetBrains Mono';margin-top:2px;}
+  .tx-amt{font-family:'JetBrains Mono';font-weight:700;font-size:13.5px;text-align:right;}
+  .tx-amt.pos{color:var(--green);}
+  .tx-amt.neg{color:var(--text-mid);}
+  .tx-status{font-size:10px;padding:2px 8px;border-radius:99px;font-weight:700;text-transform:uppercase;justify-self:end;}
+  .tx-status.completed{background:var(--green-dim);color:var(--green);}
+  .tx-status.pending{background:var(--yellow-dim);color:var(--yellow);}
+  .tx-status.failed{background:var(--red-dim);color:var(--red);}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--panel-raised);border:1px solid var(--green);color:var(--text-hi);padding:12px 20px;border-radius:10px;font-size:13px;font-family:'Space Grotesk';font-weight:600;opacity:0;transition:all .25s ease;display:flex;align-items:center;gap:8px;z-index:30;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast .dot{width:7px;height:7px;border-radius:50%;background:var(--green);}
+</style>
+<style>
+/* ═══ SIM MODE BANNER / FOOTER / DEMO NOTE (added) ═══ */
+
+.site-footer{
+  border-top:1px solid var(--panel-line);
+  background:rgba(14,12,43,.8);
+  padding:14px 22px;
+  font-size:12px; color:var(--text-low);
+}
+.foot-inner{ max-width:1100px; margin:0 auto; display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px; }
+.foot-inner a{ color:var(--text-mid); text-decoration:none; }
+.foot-inner a:hover{ color:var(--green); }
+.foot-18{ border:1px solid var(--yellow); color:var(--yellow); border-radius:6px; padding:1px 7px; font-weight:700; font-size:11px; font-family:'JetBrains Mono'; }
+
+.demo-note{
+  display:none;
+  background:var(--yellow-dim); border:1px solid rgba(255,210,74,.4);
+  color:#FFE9B0; font-size:12px; line-height:1.5;
+  padding:10px 14px; border-radius:10px; margin:14px 0 0;
+}
+
+/* Withdrawal OTP confirmation */
+.otp-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.otp-row input{
+  flex:1 1 44px;text-align:center;font-family:'JetBrains Mono';font-size:20px;font-weight:700;
+  padding:14px 0;min-width:44px;border-radius:12px;
+}
+.otp-desc{font-size:13px;color:var(--text-mid);margin-bottom:16px;line-height:1.6;}
+.btn.ghost{background:transparent;border:1px solid var(--panel-line);color:var(--text-mid);margin-top:8px;}
+.btn.ghost:hover:not(:disabled){border-color:var(--yellow);color:var(--yellow);}
+
+
+  /* Footer: clean and centered on small screens */
+  @media (max-width:640px){
+    .site-footer{ padding:12px 14px 16px; }
+    .foot-inner{ justify-content:center; gap:6px 12px; font-size:11.5px; text-align:center; }
+    .foot-inner .foot-18{ order:-1; }
+    .foot-btn{ font-size:11.5px; }
+  }
+
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+    scroll-behavior:auto !important;
+  }
+}
+</style>
+<style>
+/* ═══════════════════════════════════════════════
+   LIQUID GLASS — frosted surfaces on the BetCrash theme
+═══════════════════════════════════════════════ */
+.liquid-blob{position:fixed;border-radius:50%;filter:blur(70px);pointer-events:none;z-index:0;opacity:.55;animation:liquidFloat 38s ease-in-out infinite alternate;}
+.liquid-blob.b1{width:520px;height:520px;left:-150px;top:-130px;background:radial-gradient(circle at 30% 30%, rgba(56,242,159,.32), rgba(56,242,159,0) 70%);}
+.liquid-blob.b2{width:640px;height:640px;right:-190px;top:18%;background:radial-gradient(circle at 60% 40%, rgba(255,210,74,.24), rgba(255,210,74,0) 70%);animation-delay:-13s;}
+.liquid-blob.b3{width:560px;height:560px;left:28%;bottom:-230px;background:radial-gradient(circle at 40% 60%, rgba(126,96,255,.34), rgba(126,96,255,0) 70%);animation-delay:-25s;}
+@keyframes liquidFloat{0%{transform:translate(0,0) scale(1);}100%{transform:translate(44px,-34px) scale(1.12);}}
+@media (max-width:640px){ .liquid-blob{filter:blur(50px);opacity:.4;} }
+
+/* Surfaces above the blobs */
+body > .topbar, body > .layout, body > .toast{position:relative;z-index:1;}
+
+/* Topbar — frosted */
+.topbar{
+  background:linear-gradient(165deg, rgba(255,255,255,.06), rgba(255,255,255,.015)), rgba(14,12,43,.5);
+  -webkit-backdrop-filter:blur(18px) saturate(150%);backdrop-filter:blur(18px) saturate(150%);
+  border-bottom:1px solid rgba(255,255,255,.10);
+}
+.avatar{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);}
+
+/* Balance cards — frosted with accent glows */
+.balance-card{
+  background:linear-gradient(135deg, rgba(255,255,255,.065), rgba(255,255,255,.018) 45%, rgba(255,255,255,.05)), rgba(42,35,107,.38);
+  -webkit-backdrop-filter:blur(18px) saturate(150%);backdrop-filter:blur(18px) saturate(150%);
+  border:1px solid rgba(255,255,255,.11);
+  box-shadow:0 10px 34px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.10);
+}
+.balance-card.main{border-color:rgba(51,226,138,.42);box-shadow:0 10px 34px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.10), 0 0 26px rgba(51,226,138,.08);}
+.balance-card .glow{background:linear-gradient(135deg, var(--green), rgba(56,242,159,0));opacity:.14;}
+
+/* Panels — frosted */
+.panel{
+  background:linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.018) 45%, rgba(255,255,255,.05)), rgba(23,20,74,.42);
+  -webkit-backdrop-filter:blur(16px) saturate(150%);backdrop-filter:blur(16px) saturate(150%);
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow:0 10px 34px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.09);
+}
+.tx-row{background:rgba(255,255,255,.02);border-bottom:1px solid rgba(255,255,255,.06);border-radius:8px;}
+.tx-row:hover{background:rgba(255,255,255,.05);}
+
+/* Buttons — brand colours kept, frosted glass finish */
+.btn.deposit{
+  background:linear-gradient(135deg, rgba(56,242,159,.94), rgba(56,242,159,.78));
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.28);
+  box-shadow:0 6px 20px rgba(56,242,159,.22), inset 0 1px 0 rgba(255,255,255,.35);
+}
+.btn.withdraw{
+  background:linear-gradient(135deg, rgba(255,210,74,.95), rgba(255,210,74,.8));
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.28);
+  box-shadow:0 6px 20px rgba(255,210,74,.2), inset 0 1px 0 rgba(255,255,255,.35);
+}
+.btn.ghost{background:rgba(255,255,255,.05);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);}
+
+/* Tabs & quick amounts — frosted */
+.tabs button, .tx-filters button, .quick-amts button{
+  background:rgba(255,255,255,.05);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.10);
+}
+.tabs button.active, .tx-filters button.active{background:rgba(51,226,138,.14);border-color:rgba(51,226,138,.45);}
+
+/* Inputs — frosted */
+input, select{
+  background:rgba(22,18,58,.5);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.12);
+}
+.mpesa-badge{background:rgba(51,226,138,.08);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid rgba(51,226,138,.25);}
+.demo-note{background:rgba(255,210,74,.07);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-color:rgba(255,210,74,.35);}
+.stk-status, .summary-card{background:rgba(255,255,255,.04);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.10);}
+.toast{
+  background:linear-gradient(135deg, rgba(255,255,255,.09), rgba(255,255,255,.03)), rgba(33,27,85,.72);
+  -webkit-backdrop-filter:blur(16px) saturate(150%);backdrop-filter:blur(16px) saturate(150%);
+  border:1px solid rgba(51,226,138,.35);
+  box-shadow:0 12px 40px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.12);
+}
+.otp-row input{background:rgba(22,18,58,.55);border:1px solid rgba(255,255,255,.14);}
+.risk-flag,.status-badge{backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
+</style>
+</head>
+<body>
+<div class="liquid-blob b1" aria-hidden="true"></div>
+<div class="liquid-blob b2" aria-hidden="true"></div>
+<div class="liquid-blob b3" aria-hidden="true"></div>
+
+<!-- ═══ NOSCRIPT ═══ -->
+<noscript>
+  <div style="padding:14px;text-align:center;background:#FFD24A;color:#3B2900;font-weight:600;font-family:sans-serif;">
+    BetCrash needs JavaScript — please enable it and reload.
+  </div>
+</noscript>
+
+<div id="app-loader" style="position:fixed;inset:0;z-index:9999;background:#16123A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;opacity:1;transition:opacity .4s ease,visibility .4s ease;">
+  <div style="width:72px;height:72px;animation:neo-pulse 1.2s ease-in-out infinite;">
+    <img src="/favicon/favicon.svg" alt="" width="72" height="72">
+  </div>
+  <div style="font-family:'Space Grotesk';font-weight:700;font-size:22px;letter-spacing:.04em;">
+    <span style="color:#FFFFFF;">Bet</span><span style="color:#FFD24A;">Crash</span>
+  </div>
+</div>
+<style>
+@keyframes neo-pulse{0%,100%{filter:drop-shadow(0 0 6px rgba(56,242,159,.3));transform:scale(1);}50%{filter:drop-shadow(0 0 16px rgba(56,242,159,.6));transform:scale(1.05);}}
+</style>
+<script>window.addEventListener('load',()=>{const l=document.getElementById('app-loader');if(l){setTimeout(()=>{l.style.opacity='0';setTimeout(()=>l.remove(),500)},700);}});</script>
+
+
+<div class="topbar">
+  <div class="brand"><div class="brand-mark"><img src="/favicon/favicon.svg" alt="BetCrash" width="34" height="34"></div><div class="brand-name">Bet<span>Crash</span></div></div>
+  <div class="avatar"></div>
+</div>
+
+<div class="layout">
+  <div class="topline">
+    <h1>Wallet</h1>
+    <div class="sub">Deposit, withdraw, and track every transaction on your account</div>
+  </div>
+
+  <div class="balance-grid">
+    <div class="balance-card main">
+      <div class="glow"></div>
+      <div class="label">Main balance</div>
+      <div class="value" id="mainBal">KES 12,450</div>
+      <div class="foot">Available to bet or withdraw</div>
+    </div>
+    <div class="balance-card">
+      <div class="label">Bonus balance</div>
+      <div class="value" style="color:var(--yellow);font-size:24px;" id="bonusBal">KES 500</div>
+      <div class="foot">Wagering: 2,100 / 5,000 KES</div>
+    </div>
+    <div class="balance-card">
+      <div class="label">Pending</div>
+      <div class="value" style="font-size:24px;color:var(--text-mid);" id="pendingBal">KES 15,000</div>
+      <div class="foot">1 withdrawal in review (over KES 10,000)</div>
+    </div>
+  </div>
+
+  <div class="demo-note" id="demoNote">Demo data — the game server isn't connected, so the balances and transactions shown here are sample values, not real money.</div>
+
+  <div class="tabs">
+    <button class="active" id="tabDeposit">Deposit</button>
+    <button id="tabWithdraw">Withdraw</button>
+  </div>
+
+  <div class="content-grid">
+    <div class="panel" id="actionPanel"></div>
+
+    <div class="panel">
+      <h3>Transaction history</h3>
+      <div class="tx-filters">
+        <button class="active" data-f="all">All</button>
+        <button data-f="deposit">Deposits</button>
+        <button data-f="withdraw">Withdrawals</button>
+        <button data-f="bet">Betting</button>
+      </div>
+      <div id="txList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span class="dot"></span><span id="toastText"></span></div>
+
+<script>
+(function () {
+  // Convert network-level fetch failures into a friendly, logged error
+  var _fetch = window.fetch.bind(window);
+  window.fetch = function (url, opts) {
+    return _fetch(url, opts).catch(function (err) {
+      console.error('[BetCrash] request to', String(url), 'failed:', err);
+      var e = new Error('Unable to connect to the server. The service may be temporarily unavailable — check your connection and try again.');
+      e.originalError = err;
+      throw e;
+    });
+  };
+})();
+const API_BASE = (function () {
+  try {
+    var q = new URLSearchParams(location.search).get('api');
+    if (q && q.trim()) return q.trim(); // ?api=https://backend → live mode
+  } catch(_){}
+  var m = document.querySelector('meta[name="betcrash-api-url"]');
+  if (m && m.content && m.content.trim()) return m.content.trim();
+  if (window.BETCRASH_API_URL) return window.BETCRASH_API_URL;
+  if (['localhost', '127.0.0.1', '::1'].indexOf(location.hostname) >= 0) return 'http://localhost:3333';
+  return '';
+})();
+/* No backend configured → the whole experience is a labelled simulation. */
+const SIM_MODE = !API_BASE;
+
+/* Safe storage: never throw, even in sandboxed/private contexts */
+function safeGet(k){ try { return window.localStorage.getItem(k); } catch(_){ return null; } }
+function safeSet(k,v){ try { window.localStorage.setItem(k,v); return true; } catch(_){ return false; } }
+
+// ── Auth helpers (mirror onboarding pattern) ─────────────────────────────
+function getToken()  { return safeGet('betcrashAccessToken'); }
+function getRefresh(){ return safeGet('betcrashRefreshToken'); }
+function saveTokens(a, r){ safeSet('betcrashAccessToken', a); if(r) safeSet('betcrashRefreshToken', r); }
+
+/* ── Mode-aware UI ── */
+function applyMode(){ /* banner removed */ }
+
+async function apiFetch(path, opts = {}){
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...opts,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}),
+      ...(opts.headers||{}),
+    },
+  });
+  if(res.status === 401){
+    const refresh = getRefresh();
+    if(refresh){
+      const r = await fetch(`${API_BASE}/auth/refresh`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ refreshToken: refresh }),
+      });
+      if(r.ok){ const d = await r.json(); saveTokens(d.accessToken, d.refreshToken); return apiFetch(path, opts); }
+    }
+    window.location.href = '/onboarding';
+    throw new Error('Unauthenticated');
+  }
+  if(!res.ok){ const e = await res.json().catch(()=>({})); throw new Error(e.message || res.statusText); }
+  return res.json().catch(()=>null);
+}
+
+// ── State ────────────────────────────────────────────────────────────────
+let wallet = 0;
+let currentTab = 'deposit';
+let mpesaPhone = '';
+const AUTO_APPROVE_LIMIT = 10000;
+let txData   = null;     // transactions from the API
+let txSource = 'none';   // 'api' | 'mock'
+let txFilter = 'all';
+const user = { kycVerified: false, riskFlagged: false }; // was referenced but never defined
+
+/* ── Demo OTP generator (self-service, per SMS-IVS spec) ──
+   Same shared system as onboarding: generated codes appear on screen (like
+   the SMS) and land in the shared inbox (betcrashOtpInbox) that the admin
+   panel shows. Implements the SMS-IVS v1.0 rules: 6-digit CSPRNG code,
+   expiry (default 5 min), 60s resend cooldown, max 5 attempts, configurable
+   daily limit. Policies editable in Admin → Settings (betcrashOtpPolicy). */
+function getOtpPolicy(){
+  try {
+    const p = JSON.parse(safeGet('betcrashOtpPolicy') || 'null');
+    if(p && p.expirySec) return p;
+  } catch(_){}
+  return { expirySec: 300, cooldownSec: 60, maxAttempts: 5, dailyLimit: 10, senderId: 'BetCrash', provider: 'demo-console' };
+}
+const OTP_TTL = getOtpPolicy().expirySec * 1000;
+function dayKey(){ return new Date().toISOString().slice(0, 10); }
+function otpList(){
+  try { return JSON.parse(safeGet('betcrashOtpInbox') || '[]'); } catch(_){ return []; }
+}
+function otpStore(list){ safeSet('betcrashOtpInbox', JSON.stringify(list.slice(-30))); }
+function genOtpCode(){
+  if(window.crypto && typeof window.crypto.getRandomValues === 'function'){
+    const b = new Uint32Array(1);
+    window.crypto.getRandomValues(b);
+    return String(b[0] % 1000000).padStart(6, '0');
+  }
+  return String(Math.floor(Math.random() * 1000000)).padStart(6, '0');
+}
+/* Returns { code, wait } — wait>0 = cooldown, wait=-1 = daily limit */
+function requestOtp(purpose, dest){
+  if(!SIM_MODE) return null;
+  const pol = getOtpPolicy();
+  const list = otpList();
+  const today = dayKey();
+  const usedToday = list.filter(o => o.dest === dest && o.day === today).length;
+  if(usedToday >= pol.dailyLimit) return { wait: -1, code: null };
+  const last = [...list].reverse().find(o => o.purpose === purpose && o.dest === dest);
+  if(last && last.cooldownUntil && Date.now() < last.cooldownUntil){
+    return { wait: Math.ceil((last.cooldownUntil - Date.now()) / 1000), code: null };
+  }
+  const code = genOtpCode();
+  list.push({
+    code, purpose, dest, day: today,
+    createdAt: Date.now(),
+    expiresAt: Date.now() + pol.expirySec * 1000,
+    cooldownUntil: Date.now() + pol.cooldownSec * 1000,
+    used: false, locked: false, attempts: 0,
+  });
+  otpStore(list);
+  return { wait: 0, code };
+}
+/* Returns 'ok' | 'wrong' | 'locked' | 'expired' | 'used' */
+function verifyOtp(code, purpose){
+  if(!SIM_MODE) return 'ok';
+  const pol = getOtpPolicy();
+  const list = otpList();
+  let i = list.findIndex(o => o.code === String(code) && o.purpose === purpose);
+  if(i === -1){
+    // Wrong code that matches no record: count it against the latest pending
+    // challenge for this purpose so brute-force attempts still hit the limit.
+    const pend = [...list].reverse().find(o => o.purpose === purpose && !o.used && !o.locked && o.expiresAt > Date.now());
+    if(pend){
+      pend.attempts += 1;
+      if(pend.attempts >= getOtpPolicy().maxAttempts) pend.locked = true;
+      otpStore(list);
+      return pend.locked ? 'locked' : 'wrong';
+    }
+    return 'wrong';
+  }
+  const o = list[i];
+  if(o.used) return 'used';
+  if(o.locked) return 'locked';
+  if(o.expiresAt <= Date.now()) return 'expired';
+  if(o.code !== String(code)){
+    o.attempts += 1;
+    if(o.attempts >= pol.maxAttempts) o.locked = true;
+    otpStore(list);
+    return o.locked ? 'locked' : 'wrong';
+  }
+  o.used = true;
+  otpStore(list);
+  return 'ok';
+}
+/* Resend with cooldown; returns { code, wait } */
+function resendOtp(purpose, dest){
+  if(!SIM_MODE) return null;
+  const pol = getOtpPolicy();
+  const list = otpList();
+  const pending = [...list].reverse().find(o => o.purpose === purpose && o.dest === dest && !o.used && !o.locked && o.expiresAt > Date.now());
+  if(pending){
+    if(Date.now() < pending.cooldownUntil){
+      return { code: null, wait: Math.ceil((pending.cooldownUntil - Date.now()) / 1000) };
+    }
+    const code = genOtpCode();
+    pending.code = code;
+    pending.createdAt = Date.now();
+    pending.expiresAt = Date.now() + pol.expirySec * 1000;
+    pending.cooldownUntil = Date.now() + pol.cooldownSec * 1000;
+    pending.attempts = 0;
+    pending.locked = false;
+    otpStore(list);
+    return { code, wait: 0 };
+  }
+  return requestOtp(purpose, dest);
+}
+function handleOtpRequest(res){
+  if(!res) return null;
+  if(res.wait === -1){ showToast('Daily OTP limit reached for this number — try again tomorrow.'); return null; }
+  if(res.wait > 0){ showToast('Please wait ' + res.wait + 's before requesting another code.'); return null; }
+  if(res.code){
+    const mins = Math.round(getOtpPolicy().expirySec / 60);
+    showToast('📲 Demo OTP: ' + res.code + ' — expires in ' + mins + ' min');
+    return res.code;
+  }
+  return null;
+}
+function otpErrMsg(status){
+  return {
+    wrong:   'Incorrect code — try again.',
+    locked:  'Too many attempts — this code is locked. Request a new one.',
+    expired: 'Code expired — request a new one.',
+    used:    'This code was already used.',
+  }[status] || 'Verification failed.';
+}
+
+/* Mask a 254XXXXXXXXX number for display: 0712345678 → 0712••••78 */
+function maskPhone(p){
+  const local = '0' + String(p).slice(3);
+  return local.slice(0, 4) + '••••' + local.slice(-2);
+}
+/* Demo mode: prefill the M-Pesa number with the phone registered on this device */
+(function(){
+  if(SIM_MODE){
+    try {
+      const d = JSON.parse(safeGet('betcrashDemoUser') || 'null');
+      if(d && d.phone) mpesaPhone = d.phone;
+    } catch(_){}
+  }
+})();
+
+// ── Load real balance + transactions from API ─────────────────────────────
+async function loadWallet(){
+  if(SIM_MODE){ showDemoWallet(); return; }
+  try {
+    const [bal, txs] = await Promise.all([
+      apiFetch('/wallet/balance'),
+      apiFetch('/wallet/transactions'),
+    ]);
+    wallet = parseFloat(bal.balance);
+    user.kycVerified = !!bal.kycVerified;
+    document.getElementById('mainBal').textContent = fmt(wallet);
+    document.getElementById('bonusBal').textContent = fmt(parseFloat(bal.bonusBalance || 0));
+    document.getElementById('pendingBal').textContent = fmt(parseFloat(bal.pendingWithdrawals || 0));
+    txData = txs || [];
+    txSource = 'api';
+    renderTx(txFilter);
+    renderPanel();
+    const n = document.getElementById('demoNote'); if(n) n.style.display = 'none';
+  } catch(err){
+    // Live mode with a server problem: show an error, never fake data.
+    console.warn('Wallet load failed:', err.message);
+    txSource = 'none';
+    const list = document.getElementById('txList');
+    list.innerHTML = '<div style="color:var(--text-low);padding:16px 0;font-size:13px;">Couldn\'t load your wallet — the server is unreachable.</div>';
+    const retry = document.createElement('button');
+    retry.className = 'btn deposit';
+    retry.textContent = 'Retry';
+    retry.style.marginTop = '10px';
+    retry.addEventListener('click', loadWallet);
+    list.appendChild(retry);
+    const n = document.getElementById('demoNote');
+    if(n){ n.style.display = 'block'; n.textContent = 'Server unreachable — showing an error rather than fake balances.'; }
+  }
+}
+
+function showDemoWallet(){
+  // Labelled demo values — server not connected, no real money involved.
+  wallet = 12450;
+  user.kycVerified = true;
+  document.getElementById('mainBal').textContent = fmt(wallet);
+  document.getElementById('bonusBal').textContent = fmt(500);
+  document.getElementById('pendingBal').textContent = fmt(15000);
+  txSource = 'mock';
+  renderTx(txFilter);
+  renderPanel();
+  const n = document.getElementById('demoNote'); if(n) n.style.display = 'block';
+}
+
+function txMatchesFilter(t, filter){
+  if(filter === 'all') return true;
+  const map = { deposit:['DEPOSIT'], withdraw:['WITHDRAWAL'], bet:['BET_STAKE','BET_WIN'], bonus:['BONUS_CREDIT','BONUS_DEBIT','REFUND'] };
+  return (map[filter] || []).includes(t.type);
+}
+
+function renderTxFromApi(txs, filter = 'all'){
+  const el = document.getElementById('txList');
+  const iconMap = { DEPOSIT:'↓', WITHDRAWAL:'↑', BET_STAKE:'▼', BET_WIN:'▲', BONUS_CREDIT:'★', BONUS_DEBIT:'★', REFUND:'↩' };
+  const classMap = { DEPOSIT:'deposit', WITHDRAWAL:'withdraw', BET_STAKE:'loss', BET_WIN:'win', BONUS_CREDIT:'bonus', BONUS_DEBIT:'bonus', REFUND:'deposit' };
+  const statusMap = { COMPLETED:'completed', PENDING:'pending', FAILED:'failed', REJECTED:'failed' };
+  el.innerHTML = txs.filter(t => txMatchesFilter(t, filter)).slice(0, 30).map(t => {
+    const amt = ['WITHDRAWAL','BET_STAKE','BONUS_DEBIT'].includes(t.type) ? -Math.abs(t.amount) : Math.abs(t.amount);
+    return `
+    <div class="tx-row">
+      <div class="tx-icon ${classMap[t.type]||'deposit'}">${iconMap[t.type]||'·'}</div>
+      <div class="tx-main">
+        <div class="title">${t.description || t.type}</div>
+        <div class="sub">${t.reference||''} · ${new Date(t.createdAt).toLocaleString()}</div>
+      </div>
+      <div class="tx-amt ${amt>=0?'pos':'neg'}">${fmt(amt)}</div>
+      <div class="tx-status ${statusMap[t.status]||'pending'}">${(t.status||'').toLowerCase()}</div>
+    </div>`;
+  }).join('') || '<div style="color:var(--text-low);padding:16px 0;font-size:13px;">No transactions yet.</div>';
+}
+
+function fmt(n){ return (n<0?'-':'') + 'KES ' + Math.abs(Math.round(n)).toLocaleString(); }
+
+// ── Mock tx fallback — SIMULATION MODE ONLY, clearly labelled ─────────────
+let mockTxs=[
+  {type:'deposit', title:'M-Pesa deposit (demo)', sub:'Ref MPE7X92KL1', amt:2000, status:'completed', time:'Today, 14:22'},
+  {type:'bet', win:true, title:'Cashed out at 3.42x (demo)', sub:'Round #10481', amt:684, status:'completed', time:'Today, 13:58'},
+  {type:'bet', win:false, title:'Round crashed at 1.08x (demo)', sub:'Round #10479', amt:-200, status:'completed', time:'Today, 13:41'},
+  {type:'withdraw', title:'Withdrawal to M-Pesa (demo)', sub:'Ref MPE7X88NQ4', amt:-15000, status:'pending', time:'Today, 12:15'},
+  {type:'bonus', title:'Welcome bonus credited (demo)', sub:'Wagering requirement', amt:500, status:'completed', time:'Yesterday, 19:04'},
+];
+function renderTxMock(filter='all'){
+  const el=document.getElementById('txList');
+  const icons={deposit:'↓',withdraw:'↑',win:'▲',loss:'▼',bonus:'★'};
+  const filtered=mockTxs.filter(t=>filter==='all'||t.type===filter||( filter==='bet'&&t.type==='bet'));
+  el.innerHTML=filtered.map(t=>{
+    const iconClass=t.type==='bet'?(t.win?'win':'loss'):t.type;
+    const icon=t.type==='bet'?(t.win?icons.win:icons.loss):icons[t.type];
+    return `<div class="tx-row">
+      <div class="tx-icon ${iconClass}">${icon}</div>
+      <div class="tx-main"><div class="title">${t.title}</div><div class="sub">${t.sub} · ${t.time}</div></div>
+      <div class="tx-amt ${t.amt>0?'pos':'neg'}">${fmt(t.amt)}</div>
+      <div class="tx-status ${t.status}">${t.status}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderTx(filter = txFilter){
+  txFilter = filter;
+  if(txSource === 'api')      renderTxFromApi(txData || [], filter);
+  else if(txSource === 'mock') renderTxMock(filter);
+}
+
+document.querySelectorAll('.tx-filters button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.tx-filters button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    renderTx(b.dataset.f);
+  });
+});
+
+function showToast(text){
+  const t=document.getElementById('toast');
+  document.getElementById('toastText').textContent=text;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+// ---------- Deposit panel ----------
+function depositView(){
+  return `
+    <h3>Deposit via M-Pesa</h3>
+    <div class="mpesa-badge"><span class="mpesa-dot"></span>STK Push · funds credited automatically</div>
+    <div class="field">
+      <label>Amount</label>
+      <div class="amount-row"><span class="prefix">KES</span><input id="depAmt" value="500" inputmode="numeric"></div>
+    </div>
+    <div class="quick-amts">
+      <button data-v="200">200</button><button data-v="500">500</button>
+      <button data-v="1000">1,000</button><button data-v="5000">5,000</button>
+    </div>
+    <div class="field">
+      <label>M-Pesa number</label>
+      <input class="phone-input" id="depPhone" value="${mpesaPhone}">
+      <div class="hint">You'll receive an STK push prompt on this number</div>
+    </div>
+    <button class="btn deposit" id="depBtn">Send STK push</button>
+  `;
+}
+
+function bindDeposit(){
+  const amt=document.getElementById('depAmt');
+  document.querySelectorAll('.quick-amts button').forEach(b=>{
+    b.addEventListener('click',()=>{ amt.value=b.dataset.v; });
+  });
+  document.getElementById('depBtn').addEventListener('click',()=>{
+    const value=parseInt(amt.value)||0;
+    const phone=document.getElementById('depPhone').value;
+    if(value<50){ showToast('Minimum deposit is KES 50'); return; }
+    runStkFlow(value, phone);
+  });
+}
+
+async function runStkFlow(amount, phone){
+  const panel=document.getElementById('actionPanel');
+  if(SIM_MODE){
+    // Labelled simulation: no STK push is sent, no money moves.
+    panel.innerHTML = `
+      <div class="stk-status">
+        <div class="stk-icon wait pulse">📲</div>
+        <div class="stk-title">Check your phone (demo)</div>
+        <div class="stk-desc">Simulated STK push to <b style="color:var(--text-hi)">${phone}</b> for <b style="color:var(--text-hi)">${fmt(amount)}</b> — no real money is moved.</div>
+      </div>`;
+    showToast('Demo mode — deposit simulated (no money moved)');
+    setTimeout(()=>{
+      wallet += amount;
+      mockTxs.unshift({type:'deposit', title:'M-Pesa deposit (demo)', sub:'Simulated STK push', amt:amount, status:'completed', time:'Just now'});
+      document.getElementById('mainBal').textContent = fmt(wallet);
+      renderTx(txFilter);
+      renderPanel();
+      showToast('Demo deposit confirmed — +' + fmt(amount));
+    }, 2500);
+    return;
+  }
+  panel.innerHTML = `
+    <div class="stk-status">
+      <div class="stk-icon wait pulse">📲</div>
+      <div class="stk-title">Check your phone</div>
+      <div class="stk-desc">Sending M-Pesa prompt to <b style="color:var(--text-hi)">${phone}</b> for <b style="color:var(--text-hi)">${fmt(amount)}</b>.</div>
+    </div>`;
+
+  try {
+    await apiFetch('/wallet/deposit', {
+      method: 'POST',
+      body: JSON.stringify({ amount, mpesaPhone: phone.replace(/\s/g,'') }),
+    });
+
+    panel.innerHTML = `
+      <div class="stk-status">
+        <div class="stk-icon wait pulse">📲</div>
+        <div class="stk-title">Check your phone</div>
+        <div class="stk-desc">M-Pesa prompt sent to <b style="color:var(--text-hi)">${phone}</b>. Enter your PIN to complete the deposit. Balance updates automatically when confirmed.</div>
+        <button class="btn deposit" id="depAgainBtn" style="margin-top:16px;">Make another deposit</button>
+      </div>`;
+    document.getElementById('depAgainBtn').addEventListener('click', renderPanel);
+    showToast(`STK Push sent — check your phone for the M-Pesa prompt`);
+
+    // Poll balance for up to 60 s waiting for Safaricom callback
+    let polls = 0;
+    const poller = setInterval(async ()=>{
+      polls++;
+      try {
+        const bal = await apiFetch('/wallet/balance');
+        const newBal = parseFloat(bal.balance);
+        if(newBal !== wallet){
+          wallet = newBal;
+          document.getElementById('mainBal').textContent = fmt(wallet);
+          showToast(`Deposit confirmed — ${fmt(amount)} added to wallet`);
+          loadWallet();
+          clearInterval(poller);
+        }
+      } catch(_){}
+      if(polls >= 12) clearInterval(poller); // stop after 60 s
+    }, 5000);
+
+  } catch(err){
+    panel.innerHTML = `
+      <div class="stk-status">
+        <div class="stk-icon" style="background:var(--red-dim);color:var(--red)">✕</div>
+        <div class="stk-title">Deposit failed</div>
+        <div class="stk-desc">${err.message || 'Something went wrong. Please try again.'}</div>
+        <button class="btn deposit" id="depAgainBtn" style="margin-top:16px;">Try again</button>
+      </div>`;
+    document.getElementById('depAgainBtn').addEventListener('click', renderPanel);
+  }
+}
+
+// ---------- Withdraw panel ----------
+function withdrawView(){
+  return `
+    <h3>Withdraw to M-Pesa</h3>
+    <div class="mpesa-badge"><span class="mpesa-dot"></span>Under ${fmt(AUTO_APPROVE_LIMIT)} · verified account → instant payout</div>
+    <div class="field">
+      <label>Amount</label>
+      <div class="amount-row"><span class="prefix">KES</span><input id="wdAmt" value="1000" inputmode="numeric"></div>
+      <div class="hint" id="wdHint">Available: ${fmt(wallet)}</div>
+    </div>
+    <div class="quick-amts">
+      <button data-v="500">500</button><button data-v="1000">1,000</button>
+      <button data-v="2000">2,000</button><button data-v="max">Max</button>
+    </div>
+    <div class="field">
+      <label>M-Pesa number</label>
+      <input class="phone-input" id="wdPhone" value="${mpesaPhone ? maskPhone(mpesaPhone) : ''}" disabled style="opacity:0.7;">
+      <div class="hint">Withdrawals go to your verified number only, for security</div>
+    </div>
+    <div id="tierNote" style="font-size:11.5px;color:var(--text-low);margin-bottom:10px;font-family:'JetBrains Mono';"></div>
+    <button class="btn withdraw" id="wdBtn">Request withdrawal</button>
+  `;
+}
+
+function bindWithdraw(){
+  const amt=document.getElementById('wdAmt');
+  const hint=document.getElementById('wdHint');
+  const tierNote=document.getElementById('tierNote');
+  document.querySelectorAll('.quick-amts button').forEach(b=>{
+    b.addEventListener('click',()=>{ amt.value = b.dataset.v==='max' ? wallet : b.dataset.v; validate(); });
+  });
+  function willAutoApprove(v){
+    return v<=AUTO_APPROVE_LIMIT && user.kycVerified && !user.riskFlagged;
+  }
+  function validate(){
+    const v=parseInt(amt.value)||0;
+    if(v>wallet){ hint.className='hint err'; hint.textContent='Exceeds available balance of '+fmt(wallet); document.getElementById('wdBtn').disabled=true; tierNote.textContent=''; return; }
+    if(v<100){ hint.className='hint err'; hint.textContent='Minimum withdrawal is KES 100'; document.getElementById('wdBtn').disabled=true; tierNote.textContent=''; return; }
+    hint.className='hint'; hint.textContent='Available: '+fmt(wallet);
+    document.getElementById('wdBtn').disabled=false;
+    if(willAutoApprove(v)){
+      tierNote.innerHTML='<span style="color:var(--green);">●</span> Instant — under the '+fmt(AUTO_APPROVE_LIMIT)+' auto-approve limit';
+    } else {
+      tierNote.innerHTML='<span style="color:var(--yellow);">●</span> Held for admin review — over the '+fmt(AUTO_APPROVE_LIMIT)+' instant limit';
+    }
+  }
+  amt.addEventListener('input', validate);
+  validate();
+  document.getElementById('wdBtn').addEventListener('click', async ()=>{
+    const value=parseInt(amt.value)||0;
+    const wdBtn = document.getElementById('wdBtn');
+    const panel=document.getElementById('actionPanel');
+    wdBtn.disabled = true;
+    wdBtn.textContent = 'Processing…';
+    if(SIM_MODE){
+      // Labelled simulation: security check first — generated OTP shown here
+      // (like receiving the SMS) and recorded in the shared admin inbox.
+      wdBtn.disabled = false;
+      wdBtn.textContent = 'Request withdrawal';
+      const code = handleOtpRequest(requestOtp('withdraw', mpesaPhone || '0712••••78'));
+      renderWithdrawOtp(value, mpesaPhone ? maskPhone(mpesaPhone) : 'your phone', null, code);
+      return;
+    }
+    try {
+      const result = await apiFetch('/wallet/withdraw', {
+        method: 'POST',
+        body: JSON.stringify({ amount: value, mpesaPhone: mpesaPhone.replace(/\s/g,'') }),
+      });
+      if(result && result.challengeId){
+        // OTP required to complete the withdrawal.
+        if(result.demoCode) showToast('📲 Demo OTP: ' + result.demoCode + ' — expires in 5 min');
+        renderWithdrawOtp(value, result.maskedPhone || maskPhone(mpesaPhone), result.challengeId, result.demoCode);
+        return;
+      }
+      applyWithdrawSuccess(value, result.message, false, result.status !== 'instant');
+    } catch(err) {
+      wdBtn.disabled = false;
+      wdBtn.textContent = 'Request withdrawal';
+      hint.className = 'hint err';
+      hint.textContent = err.message || 'Withdrawal failed — try again.';
+    }
+  });
+}
+
+/* ── Withdrawal OTP confirmation ── */
+function applyWithdrawSuccess(value, message, demo, queued){
+  wallet -= value;
+  document.getElementById('mainBal').textContent = fmt(wallet);
+  if(demo){
+    mockTxs.unshift({type:'withdraw', title:'Withdrawal to M-Pesa (demo)', sub:'Simulated payout', amt:-value, status:'completed', time:'Just now'});
+    renderTx(txFilter);
+  }
+  const panel=document.getElementById('actionPanel');
+  panel.innerHTML = `
+    <div class="stk-status">
+      <div class="stk-icon ${queued ? 'wait' : 'ok'}">${queued ? '⏳' : '✓'}</div>
+      <div class="stk-title">${queued ? 'Withdrawal queued' : (demo ? 'Withdrawal sent (demo)' : 'Withdrawal sent')}</div>
+      <div class="stk-desc">${message}${demo ? ' — no real money was moved.' : ''}</div>
+      <button class="btn withdraw" id="wdAgainBtn" style="margin-top:16px;">Back to wallet</button>
+    </div>`;
+  document.getElementById('wdAgainBtn').addEventListener('click', ()=>{ if(!demo) loadWallet(); renderPanel(); });
+  showToast(demo ? 'Demo withdrawal sent (simulated)' : message);
+}
+
+function renderWithdrawOtp(amount, maskedPhone, challengeId, demoCode){
+  const panel=document.getElementById('actionPanel');
+  panel.innerHTML = `
+    <h3>Confirm withdrawal</h3>
+    <div class="otp-desc">For your security, a 6-digit code was sent to <b style="color:var(--text-hi)">${maskedPhone}</b>. Enter it to complete the withdrawal of <b style="color:var(--text-hi)">${fmt(amount)}</b>.</div>
+    <div class="otp-row">
+      ${[0,1,2,3,4,5].map(i=>`<input maxlength="1" inputmode="numeric" class="otpDigit" data-i="${i}" aria-label="Digit ${i+1}">`).join('')}
+    </div>
+    <div class="hint" id="wdOtpHint">${demoCode ? (SIM_MODE ? 'Demo code: <b style="color:var(--text-mid)">' + demoCode + '</b>' : 'Demo code (dev): <b style="color:var(--text-mid)">' + demoCode + '</b>') : ''}</div>
+    <div class="resend">Didn't get it? <span class="link" id="wdResend">Resend code</span></div>
+    <button class="btn withdraw" id="wdOtpBtn" disabled>Confirm &amp; withdraw</button>
+    <button class="btn ghost" id="wdOtpCancel">Cancel</button>
+  `;
+  const digits=[...panel.querySelectorAll('.otpDigit')];
+  digits[0].focus();
+  const btn=document.getElementById('wdOtpBtn');
+  const hint=document.getElementById('wdOtpHint');
+  function check(){
+    const code=digits.map(d=>d.value).join('');
+    btn.disabled = code.length !== 6;
+    if(demoCode && code.length===6 && code!==demoCode){
+      hint.className='hint err';
+      hint.innerHTML='Incorrect code — check the demo OTP above.';
+    }
+  }
+  digits.forEach((d,i)=>{
+    d.addEventListener('input',()=>{
+      d.value=d.value.replace(/[^0-9]/g,'');
+      if(d.value && i<5) digits[i+1].focus();
+      check();
+    });
+    d.addEventListener('keydown',(e)=>{ if(e.key==='Backspace' && !d.value && i>0) digits[i-1].focus(); });
+  });
+  btn.addEventListener('click', async ()=>{
+    const code=digits.map(d=>d.value).join('');
+    btn.disabled=true;
+    btn.textContent='Processing…';
+    if(SIM_MODE){
+      const vWd = verifyOtp(code, 'withdraw');
+      if(vWd !== 'ok'){
+        hint.className='hint err';
+        hint.innerHTML=otpErrMsg(vWd);
+        btn.disabled=false;
+        btn.textContent='Confirm & withdraw';
+        return;
+      }
+      setTimeout(()=> applyWithdrawSuccess(amount, 'Simulated payout of '+fmt(amount)+' — no real money was moved.', true), 900);
+      return;
+    }
+    try {
+      const result = await apiFetch('/wallet/withdraw/confirm', {
+        method:'POST',
+        body: JSON.stringify({ challengeId, code }),
+      });
+      applyWithdrawSuccess(amount, result.message || 'Withdrawal sent to your M-Pesa.', false);
+    } catch(err){
+      hint.className='hint err';
+      hint.textContent = err.message || 'Incorrect or expired code — try again.';
+      btn.disabled=false;
+      btn.textContent='Confirm & withdraw';
+    }
+  });
+  document.getElementById('wdOtpCancel').addEventListener('click', renderPanel);
+  const wdResend = document.getElementById('wdResend');
+  if(wdResend) wdResend.addEventListener('click', (e) => {
+    const r = resendOtp('withdraw', mpesaPhone || '0712••••78');
+    if(r && r.wait > 0){
+      e.target.textContent = 'Wait ' + r.wait + 's…';
+      setTimeout(() => { e.target.textContent = 'Resend code'; }, r.wait * 1000);
+      showToast('Please wait ' + r.wait + 's before resending.');
+      return;
+    }
+    const nc = handleOtpRequest(r);
+    if(nc){
+      hint.className = 'hint';
+      hint.innerHTML = 'Demo code: <b style="color:var(--text-mid)">' + nc + '</b>';
+    }
+  });
+}
+
+function renderPanel(){
+  const panel=document.getElementById('actionPanel');
+  if(currentTab==='deposit'){ panel.innerHTML=depositView(); bindDeposit(); }
+  else { panel.innerHTML=withdrawView(); bindWithdraw(); }
+}
+
+document.getElementById('tabDeposit').addEventListener('click',()=>{
+  currentTab='deposit';
+  document.getElementById('tabDeposit').classList.add('active');
+  document.getElementById('tabWithdraw').classList.remove('active');
+  renderPanel();
+});
+document.getElementById('tabWithdraw').addEventListener('click',()=>{
+  currentTab='withdraw';
+  document.getElementById('tabWithdraw').classList.add('active');
+  document.getElementById('tabDeposit').classList.remove('active');
+  renderPanel();
+});
+
+// Boot — wallet data; labelled demo values until the server is connected
+applyMode();
+loadWallet();
+</script>
+
+<footer class="site-footer">
+  <div class="foot-inner">
+    <span class="foot-18" aria-hidden="true">18+</span>
+    <span>Play responsibly — gambling can be addictive.</span>
+    <a href="/responsible-gaming">Responsible gaming &amp; help</a>
+    <span>24/7 helpline: <a href="https://www.responsiblegambling.or.ke/">0705 825 637</a></span>
+    <button class="foot-btn" data-bc="terms">Terms</button>
+    <button class="foot-btn" data-bc="privacy">Privacy</button></div>
+</footer>
+<!-- ═══ TERMS & PRIVACY MODALS ═══ -->
+<style>
+.bc-modal-bg{position:fixed;inset:0;z-index:9600;background:rgba(6,5,20,.75);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:20px;}
+.bc-modal-bg.open{display:flex;}
+.bc-modal{background:var(--panel);border:1px solid var(--panel-line);border-radius:16px;width:min(680px,94vw);max-height:82vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.6);}
+.bc-modal-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--panel-line);background:rgba(14,12,43,.35);}
+.bc-modal-head h3{font-family:'Space Grotesk';font-size:16px;margin:0;}
+.bc-modal-close{background:var(--panel-raised);border:1px solid var(--panel-line);color:var(--text-mid);width:32px;height:32px;border-radius:9px;cursor:pointer;font-size:14px;flex:0 0 auto;}
+.bc-modal-close:hover{color:var(--text-hi);border-color:var(--green);}
+.bc-modal-body{overflow-y:auto;padding:18px 22px;font-size:13px;line-height:1.7;color:var(--text-mid);}
+.bc-modal-body h4{font-family:'Space Grotesk';color:var(--text-hi);font-size:13.5px;margin:18px 0 6px;}
+.bc-modal-body h4:first-child{margin-top:0;}
+.bc-modal-body p{margin:0 0 10px;}
+.bc-modal-body b{color:var(--text-hi);}
+.foot-btn{background:none;border:none;color:var(--text-mid);font-size:12px;cursor:pointer;padding:0;font-family:'Inter',sans-serif;text-decoration:underline;text-underline-offset:3px;}
+.foot-btn:hover{color:var(--green);}
+@media (max-width:640px){ .bc-modal-body{padding:14px 16px;font-size:12.5px;} }
+</style>
+<div class="bc-modal-bg" id="bcModalBg" role="dialog" aria-modal="true" aria-labelledby="bcModalTitle">
+  <div class="bc-modal">
+    <div class="bc-modal-head"><h3 id="bcModalTitle">Terms &amp; Conditions</h3><button class="bc-modal-close" id="bcModalClose" aria-label="Close">✕</button></div>
+    <div class="bc-modal-body" id="bcModalBody"></div>
+  </div>
+</div>
+<script>
+(function(){
+  var TERMS = `<h4>1. Acceptance</h4>
+<p>By accessing or registering on BetCrash you agree to these Terms &amp; Conditions. If you do not agree, do not use the service. BetCrash is operated from Kenya and these terms are governed by Kenyan law.</p>
+<h4>2. Eligibility &amp; accounts</h4>
+<p>You must be <b>18 years or older</b> to use BetCrash. You may hold <b>one account only</b>, tied to your National ID number — the unique identifier for your account. You must provide accurate information (name, phone, ID) and keep your password confidential. BetCrash may suspend or close accounts that breach these terms.</p>
+<h4>3. Current status — simulation</h4>
+<p>Until a licensed live operation launches, BetCrash runs in <b>simulation mode</b>: balances, rounds, bots and transactions are demo data and no real money is involved. Live betting will only activate after the necessary Kenyan licensing (BCLB) and payment integrations are in place, at which point these terms will be updated.</p>
+<h4>4. The game</h4>
+<p>BetCrash is a crash-style game: a multiplier rises until the round crashes. You win if you cash out before the crash. The house edge is <b>3%</b>. In live mode every round is <b>provably fair</b> — the crash point is committed before the round via a seed hash and verifiable afterwards.</p>
+<h4>5. Deposits, withdrawals &amp; KYC</h4>
+<p>Payments use M-Pesa. Identity verification (KYC) is required before withdrawals; withdrawals are protected by a one-time code sent to your registered phone, and amounts above the instant limit are queued for review. BetCrash may refuse or reverse transactions suspected of fraud.</p>
+<h4>6. Responsible play</h4>
+<p>Gambling should be entertainment, not a way to make money. Only bet what you can afford to lose. Help is available 24/7: <b>0705 825 637</b> (Responsible Gambling Kenya) or GamHelp Kenya <b>+254 726 883 960</b>. See the Responsible Gaming page for limits and self-exclusion.</p>
+<h4>7. Prohibited conduct</h4>
+<p>Fraud, multi-accounting, use of automated betting tools in live play, exploiting faults, and attempting to manipulate rounds or payments are prohibited and will lead to closure and forfeiture.</p>
+<h4>8. Liability</h4>
+<p>BetCrash is provided "as is". To the extent permitted by law, we are not liable for indirect losses, service interruptions, or losses from breach of these terms by you. In simulation mode no financial liability exists because no real money is involved.</p>
+<h4>9. Changes</h4>
+<p>These terms may change as the platform evolves (e.g., when live betting launches). Continued use after changes constitutes acceptance. Contact: <b>support@betcrash.co.ke</b>.</p>`;
+  var PRIVACY = `<h4>What we collect</h4>
+<p><b>Identity:</b> National ID number, full name, date of birth, phone number, email. Your National ID is your unique account identifier. <b>Usage:</b> device, browser, operating system, IP address, session activity. <b>Financial:</b> transaction history (deposits, withdrawals, bets, wins). <b>Security:</b> login events, OTP verification events, audit logs of account actions.</p>
+<h4>How we use it</h4>
+<p>To create and secure your account, verify your identity (KYC), process payments, run the game and settle bets, prevent fraud, comply with Kenyan law (including the Data Protection Act 2019 and BCLB requirements), and improve the service. We do not sell your data.</p>
+<h4>OTP &amp; SMS security</h4>
+<p>One-time codes are generated for registration, login, withdrawals and password resets. Codes are stored <b>hashed</b>, expire within minutes, are single-use, and are limited in attempts — they are never stored in plaintext. SMS is delivered through licensed providers using your phone number only.</p>
+<h4>Sharing</h4>
+<p>We share data only with: SMS and payment providers (e.g., M-Pesa) strictly to deliver the service, and regulators (e.g., ODPC, BCLB) when legally required. In live mode, aggregated statistics may be published; never your personal details.</p>
+<h4>Storage &amp; security</h4>
+<p>Passwords are stored hashed, codes are hashed, data travels encrypted, and access to your data is restricted to authorised staff with least-privilege roles and full audit trails.</p>
+<h4>Retention</h4>
+<p>We keep records as long as your account is active and as required by Kenyan law for financial and regulatory reporting. You may request deletion where the law permits.</p>
+<h4>Your rights</h4>
+<p>You may request access to, correction of, or deletion of your personal data, and may lodge a complaint with the Office of the Data Protection Commissioner (ODPC) at <b>info@odpc.go.ke</b>. Requests can be sent to <b>privacy@betcrash.co.ke</b>.</p>`;
+  var bg = document.getElementById('bcModalBg');
+  var body = document.getElementById('bcModalBody');
+  var title = document.getElementById('bcModalTitle');
+  function openModal(kind){
+    if(!bg) return;
+    if(kind === 'privacy'){ title.textContent = 'Privacy Policy'; body.innerHTML = PRIVACY; }
+    else { title.textContent = 'Terms & Conditions'; body.innerHTML = TERMS; }
+    bg.classList.add('open');
+    body.scrollTop = 0;
+  }
+  function closeModal(){ if(bg) bg.classList.remove('open'); }
+  document.querySelectorAll('[data-bc]').forEach(function(b){
+    b.addEventListener('click', function(){ openModal(b.getAttribute('data-bc')); });
+  });
+  var closeBtn = document.getElementById('bcModalClose');
+  if(closeBtn) closeBtn.addEventListener('click', closeModal);
+  if(bg) bg.addEventListener('click', function(e){ if(e.target === bg) closeModal(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeModal(); });
+})();
+</script>
+</body>
+</html>

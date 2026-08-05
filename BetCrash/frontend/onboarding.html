@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BetCrash — Register</title>
+  <link rel="shortcut icon" href="/favicon/favicon.ico">
+  <link rel="icon" href="/favicon/favicon.svg" type="image/svg+xml">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon/favicon-48x48.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/favicon/site.webmanifest">
+  <meta name="theme-color" content="#16123A">
+  <meta name="color-scheme" content="dark">
+  <!-- Set this to your deployed BetCrash backend URL in production -->
+  <meta name="betcrash-api-url" content="">
+  <meta property="og:title" content="BetCrash">
+  <meta property="og:description" content="Premium crash gaming">
+  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#38F29F">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+  --void:#16123A; --panel:#2A236B; --panel-raised:#211B55; --panel-line:#39327E;
+  --green:#38F29F; --green-dim:rgba(56,242,159,0.14);
+  --yellow:#FFD24A; --yellow-dim:rgba(255,210,74,0.13);
+  --red:#FF4D6D; --red-dim:rgba(255,77,109,0.14);
+  --text-hi:#FFFFFF; --text-mid:#A8A4D6; --text-low:#706A9B;
+}
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:radial-gradient(120% 140% at 15% -10%, #211B55 0%, #16123A 55%);
+    color:var(--text-hi);font-family:'Inter',sans-serif;min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;padding:26px 16px 40px;
+  }
+  ::selection{background:var(--yellow);color:var(--void);}
+  input:focus,textarea:focus{outline:none;border-color:var(--green)!important;box-shadow:0 0 0 3px rgba(56,242,159,.18);}
+  .btn:active{transform:scale(.97);transition:transform .12s ease;}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:22px;text-decoration:none;color:inherit;}
+  .brand-mark{width:34px;height:34px;border-radius:10px;background:transparent;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .brand-mark img{width:34px;height:34px;object-fit:contain;}
+  .brand-name{font-family:'Space Grotesk';font-weight:700;font-size:17px;}
+  .brand-name span{color:var(--yellow);}
+
+  /* thin progress bar — shown from the OTP step on */
+  .stepper{display:flex;align-items:center;gap:6px;margin-bottom:22px;max-width:460px;width:100%;display:none;}
+  .stepper.show{display:flex;}
+  .step-dot{flex:1;height:4px;border-radius:99px;background:var(--panel-line);position:relative;overflow:hidden;}
+  .step-dot .fill{position:absolute;inset:0;background:var(--green);width:0%;transition:width .4s ease;}
+  .step-dot.done .fill{width:100%;}
+  .step-dot.active .fill{width:55%;background:var(--yellow);}
+
+  .card{
+    width:100%;max-width:460px;background:var(--panel);border:1px solid var(--panel-line);
+    border-radius:20px;padding:30px 28px;box-shadow:0 28px 80px rgba(0,0,0,0.18);
+  }
+  .card h2{font-family:'Space Grotesk';font-size:22px;margin:0 0 6px;font-weight:700;}
+  .card .desc{font-size:14px;color:var(--text-mid);margin-bottom:22px;line-height:1.6;}
+
+  label{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-mid);font-weight:600;display:block;margin-bottom:8px;}
+  .field{margin-bottom:15px;}
+  input{
+    width:100%;background:var(--void);border:1px solid var(--panel-line);border-radius:9px;
+    padding:12px 12px;color:var(--text-hi);font-family:'Inter';font-size:15px;outline:none;
+  }
+  input:focus{border-color:var(--green);}
+  .hint{font-size:11px;color:var(--text-low);margin-top:5px;line-height:1.45;}
+  .hint.err{color:var(--red);}
+  .hint.ok{color:var(--green);}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+  /* ID field — the unique identifier, highlighted */
+  .id-wrap{position:relative;}
+  .id-badge{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:10.5px;font-weight:700;font-family:'JetBrains Mono';
+    color:var(--yellow);background:var(--yellow-dim);
+    border:1px solid rgba(255,210,74,.45);border-radius:99px;
+    padding:3px 9px;margin-bottom:8px;letter-spacing:.04em;
+  }
+  .id-field{font-family:'JetBrains Mono';letter-spacing:.12em;font-size:17px!important;padding:13px 12px!important;}
+  .id-field.ok{border-color:var(--green);}
+  .id-field.err{border-color:var(--red);}
+
+  /* password visibility toggle */
+  .pw-wrap{position:relative;}
+  .pw-wrap input{padding-right:46px;}
+  .pw-toggle{
+    position:absolute;right:4px;top:50%;transform:translateY(-50%);
+    background:transparent;border:none;color:var(--text-low);cursor:pointer;
+    font-size:16px;padding:8px;border-radius:8px;
+  }
+  .pw-toggle:hover{color:var(--text-hi);}
+
+  .btn{
+    width:100%;padding:14px 16px;border:none;border-radius:12px;font-family:'Space Grotesk';font-weight:700;
+    font-size:15px;cursor:pointer;background:var(--green);color:#062616;margin-top:14px;
+    transition:transform .2s ease,background .2s ease;
+  }
+  .btn:hover:not(:disabled){transform:translateY(-1px);}
+  .btn:disabled{background:var(--panel-raised);color:var(--text-low);cursor:not-allowed;}
+  .btn.secondary{background:transparent;border:1px solid var(--panel-line);color:var(--text-mid);margin-top:8px;}
+  .btn.secondary:hover:not(:disabled){border-color:var(--green);color:var(--green);}
+  .btn:disabled:hover{transform:none;}
+
+  /* consent line (photo format) */
+  .consent{font-size:11.5px;color:var(--text-low);text-align:center;margin-top:14px;line-height:1.6;}
+  .consent b{color:var(--text-mid);font-weight:600;}
+
+  .login-row{font-size:12.5px;color:var(--text-mid);text-align:center;margin-top:16px;}
+  .link{color:var(--yellow);cursor:pointer;font-weight:600;background:none;border:none;padding:0;font-size:12.5px;}
+  .link:hover{text-decoration:underline;}
+
+  .agree{
+    display:flex;align-items:flex-start;gap:9px;
+    font-size:12px;color:var(--text-mid);line-height:1.5;
+    margin:12px 0 4px;cursor:pointer;text-align:left;
+  }
+  .agree input{ margin-top:2px; accent-color:var(--green); width:15px; height:15px; flex:0 0 auto; }
+
+  /* OTP */
+  .otp-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+  .otp-row input{
+    flex:1 1 44px;text-align:center;font-family:'JetBrains Mono';font-size:20px;font-weight:700;padding:14px 0;
+    min-width:44px;border-radius:12px;
+  }
+  .resend{font-size:12.5px;color:var(--text-mid);margin-top:12px;text-align:center;}
+
+  /* done screen */
+  .status-center{text-align:center;padding:10px 0 4px;}
+  .status-icon{
+    width:64px;height:64px;border-radius:50%;margin:0 auto 16px;
+    display:flex;align-items:center;justify-content:center;font-size:26px;
+  }
+  .status-icon.verified{background:var(--green-dim);color:var(--green);}
+  .summary-card{
+    background:var(--void);border:1px solid var(--panel-line);border-radius:12px;
+    padding:14px 16px;margin:16px 0 4px;text-align:left;
+  }
+  .summary-card .row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:13px;}
+  .summary-card .row + .row{border-top:1px dashed var(--panel-line);}
+  .summary-card .k{color:var(--text-low);font-size:11px;text-transform:uppercase;letter-spacing:.07em;}
+  .summary-card .v{font-family:'JetBrains Mono';font-weight:700;color:var(--text-hi);}
+
+  .foot-note{font-size:11.5px;color:var(--text-low);text-align:center;margin-top:18px;line-height:1.6;}
+
+  @media (max-width:680px) {
+    body{padding:18px 14px 44px;}
+    .brand{flex-direction:column;align-items:center;margin-bottom:16px;text-align:center;}
+    .brand-name{font-size:18px;}
+    .card{padding:24px 20px;}
+    .row2{grid-template-columns:1fr;}
+    .field{margin-bottom:14px;}
+    input{font-size:16px;padding:13px 12px;}
+    .btn{font-size:15px;padding:15px 16px;}
+    .otp-row{gap:6px;}
+    .otp-row input{min-width:48px;font-size:18px;padding:13px 0;}
+  }
+</style>
+<style>
+/* ═══ SIM MODE BANNER / FOOTER ═══ */
+
+.site-footer{
+  border-top:1px solid var(--panel-line);
+  background:rgba(14,12,43,.8);
+  padding:12px 22px;
+  font-size:12px; color:var(--text-low);
+  margin-top:40px;
+}
+.foot-inner{ max-width:760px; margin:0 auto; display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px; justify-content:center; }
+.foot-inner a{ color:var(--text-mid); text-decoration:none; }
+.foot-inner a:hover{ color:var(--green); }
+.foot-18{ border:1px solid var(--yellow); color:var(--yellow); border-radius:6px; padding:1px 7px; font-weight:700; font-size:11px; font-family:'JetBrains Mono'; }
+
+
+  /* Footer: clean and centered on small screens */
+  @media (max-width:640px){
+    .site-footer{ padding:12px 14px 16px; }
+    .foot-inner{ justify-content:center; gap:6px 12px; font-size:11.5px; text-align:center; }
+    .foot-inner .foot-18{ order:-1; }
+    .foot-btn{ font-size:11.5px; }
+  }
+
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+    scroll-behavior:auto !important;
+  }
+}
+</style>
+<style>
+/* ═══════════════════════════════════════════════
+   LIQUID GLASS — frosted surfaces on the BetCrash theme
+═══════════════════════════════════════════════ */
+.liquid-blob{position:fixed;border-radius:50%;filter:blur(70px);pointer-events:none;z-index:0;opacity:.55;animation:liquidFloat 38s ease-in-out infinite alternate;}
+.liquid-blob.b1{width:520px;height:520px;left:-150px;top:-130px;background:radial-gradient(circle at 30% 30%, rgba(56,242,159,.32), rgba(56,242,159,0) 70%);}
+.liquid-blob.b2{width:640px;height:640px;right:-190px;top:18%;background:radial-gradient(circle at 60% 40%, rgba(255,210,74,.24), rgba(255,210,74,0) 70%);animation-delay:-13s;}
+.liquid-blob.b3{width:560px;height:560px;left:28%;bottom:-230px;background:radial-gradient(circle at 40% 60%, rgba(126,96,255,.34), rgba(126,96,255,0) 70%);animation-delay:-25s;}
+@keyframes liquidFloat{0%{transform:translate(0,0) scale(1);}100%{transform:translate(44px,-34px) scale(1.12);}}
+@media (max-width:640px){ .liquid-blob{filter:blur(50px);opacity:.4;} }
+
+/* Surfaces above the blobs */
+body > .card, body > .brand, body > .stepper, body > .toast, body > footer{position:relative;z-index:1;}
+
+/* Main card — frosted glass */
+.card{
+  background:linear-gradient(135deg, rgba(255,255,255,.065), rgba(255,255,255,.018) 45%, rgba(255,255,255,.05)), rgba(42,35,107,.38);
+  -webkit-backdrop-filter:blur(20px) saturate(150%);backdrop-filter:blur(20px) saturate(150%);
+  border:1px solid rgba(255,255,255,.13);
+  box-shadow:0 28px 80px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.12);
+}
+
+/* Inputs — frosted */
+input, select{
+  background:rgba(22,18,58,.5);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.13);
+}
+.id-badge{background:rgba(255,210,74,.09);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-color:rgba(255,210,74,.4);}
+.otp-row input{background:rgba(22,18,58,.55);border:1px solid rgba(255,255,255,.16);}
+.pw-toggle{background:rgba(255,255,255,.05);border-radius:8px;}
+.pw-toggle:hover{background:rgba(255,255,255,.1);}
+
+/* Buttons — brand colours kept, glass finish */
+.btn{
+  background:linear-gradient(135deg, rgba(56,242,159,.94), rgba(56,242,159,.78));
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.28);
+  box-shadow:0 6px 20px rgba(56,242,159,.22), inset 0 1px 0 rgba(255,255,255,.35);
+}
+.btn.secondary{background:rgba(255,255,255,.05);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.13);}
+.btn:disabled{background:rgba(255,255,255,.06);color:var(--text-low);box-shadow:none;}
+
+/* Status / summary / stepper — frosted */
+.status-icon{backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
+.summary-card{background:rgba(255,255,255,.04);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.10);}
+.upload-box{background:rgba(255,255,255,.03);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);}
+.upload-box:hover{border-color:var(--green);}
+.step-dot{background:rgba(255,255,255,.08);}
+.agree input{accent-color:var(--green);}
+.toast{
+  background:linear-gradient(135deg, rgba(255,255,255,.09), rgba(255,255,255,.03)), rgba(33,27,85,.72);
+  -webkit-backdrop-filter:blur(16px) saturate(150%);backdrop-filter:blur(16px) saturate(150%);
+  border:1px solid rgba(51,226,138,.35);
+  box-shadow:0 12px 40px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.12);
+}
+</style>
+</head>
+<body>
+<div class="liquid-blob b1" aria-hidden="true"></div>
+<div class="liquid-blob b2" aria-hidden="true"></div>
+<div class="liquid-blob b3" aria-hidden="true"></div>
+
+<!-- ═══ NOSCRIPT ═══ -->
+<noscript>
+  <div style="padding:14px;text-align:center;background:#FFD24A;color:#3B2900;font-weight:600;font-family:sans-serif;">
+    BetCrash needs JavaScript — please enable it and reload.
+  </div>
+</noscript>
+
+<div class="brand">
+  <div class="brand-mark"><img src="/favicon/favicon.svg" alt="BetCrash" width="34" height="34"></div>
+  <div class="brand-name">Bet<span>Crash</span></div>
+</div>
+
+<div class="stepper" id="stepper"></div>
+
+<div class="card" id="card"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast" role="status" aria-live="polite" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--panel-raised);border:1px solid var(--green);color:var(--text-hi);padding:12px 20px;border-radius:10px;font-size:13px;font-family:'Space Grotesk';font-weight:600;opacity:0;transition:all .25s ease;z-index:9500;max-width:90vw;"></div>
+
+<script>
+(function () {
+  // Convert network-level fetch failures into a friendly, logged error
+  var _fetch = window.fetch.bind(window);
+  window.fetch = function (url, opts) {
+    return _fetch(url, opts).catch(function (err) {
+      console.error('[BetCrash] request to', String(url), 'failed:', err);
+      var e = new Error('Unable to connect to the server. The service may be temporarily unavailable — check your connection and try again.');
+      e.originalError = err;
+      throw e;
+    });
+  };
+})();
+const API_BASE = (function () {
+  try {
+    var q = new URLSearchParams(location.search).get('api');
+    if (q && q.trim()) return q.trim(); // ?api=https://backend → live mode
+  } catch(_){}
+  var m = document.querySelector('meta[name="betcrash-api-url"]');
+  if (m && m.content && m.content.trim()) return m.content.trim();
+  if (window.BETCRASH_API_URL) return window.BETCRASH_API_URL;
+  if (['localhost', '127.0.0.1', '::1'].indexOf(location.hostname) >= 0) return 'http://localhost:3333';
+  return '';
+})();
+/* No backend configured → the whole experience is a labelled simulation. */
+const SIM_MODE = !API_BASE;
+
+/* Safe storage: never throw, even in sandboxed/private contexts */
+function safeGet(k){ try { return window.localStorage.getItem(k); } catch(_){ return null; } }
+function safeSet(k,v){ try { window.localStorage.setItem(k,v); return true; } catch(_){ return false; } }
+
+const STEPS = ['register', 'otp', 'done'];
+const RESET_STEPS = ['reset_id', 'reset_otp', 'reset_new', 'reset_done'];
+let stepIdx = 0;
+/* authMode: 'register' | 'login' | 'reset' — /onboarding?mode=login opens straight on login */
+let authMode = new URLSearchParams(location.search).get('mode') === 'login' ? 'login' : 'register';
+let userData = { idNumber: '', phone: '', password: '' };
+/* Password-reset flow state */
+let resetStep = 0, resetChallenge = null, resetOtp = null, resetId = '', resetToken = null;
+/* Pending demo OTPs for the current register/login flow */
+let pendingOtp = null, loginOtp = null;
+
+/* ── Demo OTP generator (self-service, per SMS-IVS spec) ──
+   Implements the SMS-IVS v1.0 business rules in simulation:
+   · 6-digit OTP (CSPRNG)
+   · expiry (default 5 min)
+   · 60s resend cooldown
+   · max 5 verify attempts per code (lockout beyond)
+   · configurable daily limit per destination (default 10)
+   · shared inbox (betcrashOtpInbox) that the admin panel shows like an SMS
+     gateway, with attempts/status visible.
+   Policies are configurable from Admin → Settings (betcrashOtpPolicy) and
+   read at call time, so reconfiguration applies immediately.
+   In live mode the real SMS-IVS service replaces this (see backend/). */
+function getOtpPolicy(){
+  try {
+    const p = JSON.parse(safeGet('betcrashOtpPolicy') || 'null');
+    if(p && p.expirySec) return p;
+  } catch(_){}
+  return { expirySec: 300, cooldownSec: 60, maxAttempts: 5, dailyLimit: 10, senderId: 'BetCrash', provider: 'demo-console' };
+}
+const OTP_TTL = getOtpPolicy().expirySec * 1000;
+function dayKey(){ return new Date().toISOString().slice(0, 10); }
+function otpList(){
+  try { return JSON.parse(safeGet('betcrashOtpInbox') || '[]'); } catch(_){ return []; }
+}
+function otpStore(list){
+  safeSet('betcrashOtpInbox', JSON.stringify(list.slice(-30)));
+}
+function genOtpCode(){
+  if(window.crypto && typeof window.crypto.getRandomValues === 'function'){
+    const b = new Uint32Array(1);
+    window.crypto.getRandomValues(b);
+    return String(b[0] % 1000000).padStart(6, '0');
+  }
+  return String(Math.floor(Math.random() * 1000000)).padStart(6, '0');
+}
+/* Returns { code, wait } — wait>0 means "resend blocked, try again in Ns" */
+function requestOtp(purpose, dest){
+  if(!SIM_MODE) return null;
+  const pol = getOtpPolicy();
+  const list = otpList();
+  const today = dayKey();
+  const usedToday = list.filter(o => o.dest === dest && o.day === today).length;
+  if(usedToday >= pol.dailyLimit){
+    return { wait: -1, code: null }; // -1 = daily limit reached
+  }
+  const last = [...list].reverse().find(o => o.purpose === purpose && o.dest === dest);
+  if(last && last.cooldownUntil && Date.now() < last.cooldownUntil){
+    return { wait: Math.ceil((last.cooldownUntil - Date.now()) / 1000), code: null };
+  }
+  const code = genOtpCode();
+  list.push({
+    code, purpose, dest, day: today,
+    createdAt: Date.now(),
+    expiresAt: Date.now() + pol.expirySec * 1000,
+    cooldownUntil: Date.now() + pol.cooldownSec * 1000,
+    used: false, locked: false, attempts: 0,
+  });
+  otpStore(list);
+  return { wait: 0, code };
+}
+/* Verify with attempt limiting: returns 'ok' | 'wrong' | 'locked' | 'expired' | 'used' */
+function verifyOtp(code, purpose){
+  if(!SIM_MODE) return 'ok';
+  const pol = getOtpPolicy();
+  const list = otpList();
+  let i = list.findIndex(o => o.code === String(code) && o.purpose === purpose);
+  if(i === -1){
+    // Wrong code that matches no record: count it against the latest pending
+    // challenge for this purpose so brute-force attempts still hit the limit.
+    const pend = [...list].reverse().find(o => o.purpose === purpose && !o.used && !o.locked && o.expiresAt > Date.now());
+    if(pend){
+      pend.attempts += 1;
+      if(pend.attempts >= getOtpPolicy().maxAttempts) pend.locked = true;
+      otpStore(list);
+      return pend.locked ? 'locked' : 'wrong';
+    }
+    return 'wrong';
+  }
+  const o = list[i];
+  if(o.used) return 'used';
+  if(o.locked) return 'locked';
+  if(o.expiresAt <= Date.now()) return 'expired';
+  if(o.code !== String(code)){
+    o.attempts += 1;
+    if(o.attempts >= pol.maxAttempts) o.locked = true;
+    otpStore(list);
+    return o.locked ? 'locked' : 'wrong';
+  }
+  o.used = true;
+  otpStore(list);
+  return 'ok';
+}
+/* Resend: applies the 60s cooldown; returns { code, wait } */
+function resendOtp(purpose, dest){
+  if(!SIM_MODE) return null;
+  const pol = getOtpPolicy();
+  const list = otpList();
+  const pending = [...list].reverse().find(o => o.purpose === purpose && o.dest === dest && !o.used && !o.locked && o.expiresAt > Date.now());
+  if(pending){
+    if(Date.now() < pending.cooldownUntil){
+      return { code: null, wait: Math.ceil((pending.cooldownUntil - Date.now()) / 1000) };
+    }
+    const code = genOtpCode();
+    pending.code = code;
+    pending.createdAt = Date.now();
+    pending.expiresAt = Date.now() + pol.expirySec * 1000;
+    pending.cooldownUntil = Date.now() + pol.cooldownSec * 1000;
+    pending.attempts = 0;
+    pending.locked = false;
+    otpStore(list);
+    return { code, wait: 0 };
+  }
+  return requestOtp(purpose, dest);
+}
+
+/* Handle a requestOtp/resendOtp result: toasts cooldown/daily-limit messages,
+   returns the code (or null) for the OTP screen hint. */
+function handleOtpRequest(res){
+  if(!res) return null;
+  if(res.wait === -1){ showToast('Daily OTP limit reached for this number — try again tomorrow.'); return null; }
+  if(res.wait > 0){ showToast('Please wait ' + res.wait + 's before requesting another code.'); return null; }
+  if(res.code){
+    const mins = Math.round(getOtpPolicy().expirySec / 60);
+    showToast('📲 Demo OTP: ' + res.code + ' — expires in ' + mins + ' min');
+    return res.code;
+  }
+  return null;
+}
+function otpErrMsg(status){
+  return {
+    wrong:   'Incorrect code — try again.',
+    locked:  'Too many attempts — this code is locked. Request a new one.',
+    expired: 'Code expired — request a new one.',
+    used:    'This code was already used.',
+  }[status] || 'Verification failed.';
+}
+
+// Demo account created at registration (simulation mode only) so the
+// register → log out → log in loop can be tried without a server.
+let demoUser = null;
+try { demoUser = JSON.parse(safeGet('betcrashDemoUser') || 'null'); } catch(_){ demoUser = null; }
+
+// demo-only ID registry — in production this is a server-side lookup against verified accounts
+const REGISTERED_ID_NUMBERS = ['34567891','29981144','40112203'];
+
+function getAuthToken(){ return safeGet('betcrashAccessToken'); }
+function getRefreshToken(){ return safeGet('betcrashRefreshToken'); }
+function setAuthTokens(auth){
+  if(auth.accessToken) safeSet('betcrashAccessToken', auth.accessToken);
+  if(auth.refreshToken) safeSet('betcrashRefreshToken', auth.refreshToken);
+}
+
+/* ── Mode-aware UI ── */
+function applyMode(){ /* banner removed */ }
+
+/* ── API helpers ── */
+async function fetchJson(url, options = {}, retry = true){
+  const isJson = !options.headers || !options.headers['Content-Type'];
+  const headers = {
+    'Content-Type': isJson ? 'application/json' : undefined,
+    ...(getAuthToken() ? { Authorization: `Bearer ${getAuthToken()}` } : {}),
+    ...options.headers,
+  };
+  const res = await fetch(url, { ...options, headers });
+  const data = await res.json().catch(()=>null);
+  if(res.ok) return data;
+  if(res.status === 401 && retry && !url.endsWith('/auth/refresh')){
+    await refreshAuth();
+    return fetchJson(url, options, false);
+  }
+  throw new Error(data?.message || data?.error || res.statusText || 'Request failed');
+}
+async function refreshAuth(){
+  const refreshToken = getRefreshToken();
+  if(!refreshToken) throw new Error('Missing refresh token');
+  const data = await fetchJson(`${API_BASE}/auth/refresh`, {
+    method: 'POST',
+    body: JSON.stringify({ refreshToken }),
+  }, false);
+  setAuthTokens(data);
+  return data;
+}
+
+/* Normalise a Kenyan phone number to 254XXXXXXXXX */
+function normalizePhone(raw){
+  let d = String(raw).replace(/[^\d]/g, '');
+  if(d.startsWith('0')) d = '254' + d.slice(1);
+  else if(d.startsWith('254') && d.length === 12) { /* already fine */ }
+  else if(d.length === 9) d = '254' + d; // bare 7XXXXXXXX / 1XXXXXXXX
+  return d;
+}
+function isValidPhone(raw){
+  const d = String(raw).replace(/[^\d]/g, '');
+  return /^(07|01)\d{8}$/.test(d) || /^254(7|1)\d{8}$/.test(d);
+}
+function isValidId(raw){
+  return /^\d{6,9}$/.test(String(raw).trim());
+}
+
+/* ── Views ── */
+function viewRegister(){
+  return `
+    <h2>Create your account</h2>
+    <div class="desc">Enter your National ID and phone number — it takes less than a minute.</div>
+
+    <div class="field">
+      <div class="id-badge">🪪&nbsp; Your National ID is your unique account ID</div>
+      <input id="fId" class="id-field" inputmode="numeric" autocomplete="off"
+             placeholder="e.g. 34567891" maxlength="9" aria-label="National ID number">
+      <div class="hint" id="idHint">One account per ID — checked automatically.</div>
+    </div>
+
+    <div class="field">
+      <label for="fPhone">Phone number</label>
+      <input id="fPhone" type="tel" inputmode="numeric" autocomplete="tel"
+             placeholder="e.g. 0712 345 678" aria-label="Phone number">
+      <div class="hint" id="phoneHint">We'll send a verification code to this number.</div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label for="fPass">Password</label>
+        <div class="pw-wrap">
+          <input id="fPass" type="password" autocomplete="new-password" placeholder="Min. 8 characters" aria-label="Password">
+          <button type="button" class="pw-toggle" data-for="fPass" aria-label="Show password">👁</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="fPass2">Confirm password</label>
+        <div class="pw-wrap">
+          <input id="fPass2" type="password" autocomplete="new-password" placeholder="Repeat password" aria-label="Confirm password">
+          <button type="button" class="pw-toggle" data-for="fPass2" aria-label="Show password">👁</button>
+        </div>
+      </div>
+    </div>
+    <div class="hint" id="passHint" style="margin-top:-6px;margin-bottom:14px;"></div>
+
+    <button class="btn" id="regBtn">Register</button>
+    <div class="consent">By clicking Register you confirm to have read in detail, understood and agreed to the
+      <b>Terms and Conditions</b>, the <b>Privacy Policy</b> and also that you are <b>over 18 years of age</b>.</div>
+    <div class="login-row">Already have an account? <button class="link" id="loginLink">Log in</button></div>
+  `;
+}
+
+function viewDone(){
+  return `
+    <div class="status-center">
+      <div class="status-icon verified">✓</div>
+      <h2>You're all set</h2>
+      <div class="desc" style="margin-bottom:0;">Your account is ready. Welcome to BetCrash.</div>
+    </div>
+    <div class="summary-card">
+      <div class="row"><span class="k">National ID</span><span class="v">${userData.idNumber}</span></div>
+      <div class="row"><span class="k">Phone</span><span class="v">0${userData.phone.slice(3)}</span></div>
+    </div>
+    <button class="btn" id="toWallet">Go to wallet</button>
+    <button class="btn secondary" id="toGame">Start playing</button>
+    <div class="foot-note">Play responsibly — gambling can be addictive. Help: <a href="/responsible-gaming" style="color:var(--yellow);">responsible-gaming</a></div>
+  `;
+}
+
+/* ── Password reset views ── */
+function viewResetId(){
+  return `
+    <h2>Reset your password</h2>
+    <div class="desc">Enter your National ID to receive a one-time code on your registered phone.</div>
+    <div class="field">
+      <div class="id-badge">🪪&nbsp; National ID — your unique account ID</div>
+      <input id="rsId" class="id-field" inputmode="numeric" autocomplete="off"
+             placeholder="e.g. 34567891" maxlength="9" aria-label="National ID number">
+      <div class="hint" id="rsIdHint">We'll send a code to the phone on this account.</div>
+    </div>
+    <button class="btn" id="rsBtn">Request code</button>
+    <div class="login-row">Remembered it? <button class="link" id="rsBack">Back to log in</button></div>
+  `;
+}
+function viewResetNew(){
+  return `
+    <h2>Set a new password</h2>
+    <div class="desc">Choose a new password for <b style="color:var(--text-hi)">${resetId}</b>. It's saved instantly — next login uses it.</div>
+    <div class="field">
+      <label for="rsPass">New password</label>
+      <div class="pw-wrap">
+        <input id="rsPass" type="password" autocomplete="new-password" placeholder="Min. 8 characters" aria-label="New password">
+        <button type="button" class="pw-toggle" data-for="rsPass" aria-label="Show password">👁</button>
+      </div>
+    </div>
+    <div class="field">
+      <label for="rsPass2">Confirm new password</label>
+      <div class="pw-wrap">
+        <input id="rsPass2" type="password" autocomplete="new-password" placeholder="Repeat password" aria-label="Confirm new password">
+        <button type="button" class="pw-toggle" data-for="rsPass2" aria-label="Show password">👁</button>
+      </div>
+    </div>
+    <div class="hint" id="rsPassHint" style="margin-top:-6px;margin-bottom:14px;"></div>
+    <button class="btn" id="rsSaveBtn">Save new password</button>
+  `;
+}
+function viewResetDone(){
+  return `
+    <div class="status-center">
+      <div class="status-icon verified">✓</div>
+      <h2>Password updated</h2>
+      <div class="desc" style="margin-bottom:0;">Your password was changed and saved. Log in with your new password.</div>
+    </div>
+    <button class="btn" id="rsToLogin">Back to log in</button>
+  `;
+}
+
+/* ── Render ── */
+function renderStepper(){
+  const el = document.getElementById('stepper');
+  el.innerHTML = '';
+  if(stepIdx === 0 || authMode !== 'register'){ el.classList.remove('show'); return; }
+  el.classList.add('show');
+  for(let i = 0; i < STEPS.length; i++){
+    const d = document.createElement('div');
+    d.className = 'step-dot' + (i < stepIdx ? ' done' : i === stepIdx ? ' active' : '');
+    d.innerHTML = '<div class="fill"></div>';
+    el.appendChild(d);
+  }
+}
+
+function goTo(step){
+  stepIdx = STEPS.indexOf(step);
+  renderStepper();
+  render();
+}
+
+function setAuthMode(m){
+  authMode = m;
+  stepIdx = 0;
+  if(m === 'reset'){ startReset(); return; }
+  renderStepper();
+  render();
+  try {
+    const url = new URL(location.href);
+    if(m === 'login') url.searchParams.set('mode', 'login');
+    else url.searchParams.delete('mode');
+    history.replaceState(null, '', url);
+  } catch(_){}
+}
+
+function render(){
+  const card = document.getElementById('card');
+  if(authMode === 'reset'){
+    const step = RESET_STEPS[resetStep];
+    if(step === 'reset_id'){ card.innerHTML = viewResetId(); bindResetId(); }
+    else if(step === 'reset_otp'){ card.innerHTML = viewOtp('reset'); bindResetOtp(); }
+    else if(step === 'reset_new'){ card.innerHTML = viewResetNew(); bindResetNew(); }
+    else { card.innerHTML = viewResetDone(); bindResetDone(); }
+    return;
+  }
+  if(authMode === 'login'){
+    if(stepIdx === 0){ card.innerHTML = viewLogin(); bindEvents('login'); }
+    else             { card.innerHTML = viewOtp('login'); bindEvents('login_otp'); }
+    return;
+  }
+  const step = STEPS[stepIdx];
+  if(step === 'register'){ card.innerHTML = viewRegister(); bindEvents('register'); }
+  else if(step === 'otp'){ card.innerHTML = viewOtp('register'); bindEvents('otp'); }
+  else if(step === 'done'){ card.innerHTML = viewDone(); bindEvents('done'); }
+}
+
+function startReset(){
+  authMode = 'reset';
+  resetStep = 0; resetChallenge = null; resetOtp = null; resetId = ''; resetToken = null;
+  stepIdx = 0;
+  renderStepper();
+  render();
+}
+
+function viewLogin(){
+  return `
+    <h2>Welcome back</h2>
+    <div class="desc">Enter your National ID number and password below to login to your existing account. Otherwise click on <b>Register</b> with the same details to create a new account.</div>
+    <div class="field">
+      <div class="id-badge">🪪&nbsp; Log in with your National ID</div>
+      <input id="lId" class="id-field" inputmode="numeric" autocomplete="off"
+             placeholder="e.g. 34567891" maxlength="9" aria-label="National ID number">
+      <div class="hint" id="lIdHint">Enter the National ID you registered with.</div>
+    </div>
+    <div class="field">
+      <label for="lPass">Password</label>
+      <div class="pw-wrap">
+        <input id="lPass" type="password" autocomplete="current-password" placeholder="Enter your password" aria-label="Password">
+        <button type="button" class="pw-toggle" data-for="lPass" aria-label="Show password">👁</button>
+      </div>
+    </div>
+    <div style="text-align:right;margin-top:-6px;">
+      <button class="link" id="forgotLink" style="font-size:12px;">Forgot password?</button>
+    </div>
+    <button class="btn" id="lBtn">Log in</button>
+    <div class="hint" style="text-align:center;margin-top:10px;">🔐 Secure sign-in — after we verify your password, a one-time code will be sent to your phone.</div>
+    <div class="login-row">Don't have an account? <button class="link" id="registerLink">Register</button></div>
+  `;
+}
+
+/* Mask a 254XXXXXXXXX number for display: 0712345678 → 0712••••78 */
+function maskPhone(p){
+  const local = '0' + String(p).slice(3);
+  return local.slice(0, 4) + '••••' + local.slice(-2);
+}
+
+function viewOtp(kind){
+  const isLogin = kind === 'login';
+  const isReset = kind === 'reset';
+  const demoCode = isReset ? resetOtp : isLogin ? loginOtp : pendingOtp;
+  const dest = isReset
+    ? ((demoUser && demoUser.phone) ? maskPhone(demoUser.phone) : 'your registered phone')
+    : userData.phone ? maskPhone(userData.phone) : (isLogin ? 'your registered phone' : 'your phone');
+  return `
+    <h2>${isLogin ? 'Two-step verification' : isReset ? 'Verify it\'s you' : 'Verify your phone'}</h2>
+    <div class="desc">${isReset
+      ? `A 6-digit code was sent to <b style="color:var(--text-hi)">${dest}</b>. Enter it to reset your password.`
+      : isLogin
+        ? `For your security, we sent a 6-digit code to <b style="color:var(--text-hi)">${dest}</b>. Enter it to finish logging in.`
+        : `We sent a 6-digit code to <b style="color:var(--text-hi)">${dest}</b>.`}</div>
+    <div class="otp-row">
+      ${[0,1,2,3,4,5].map(i=>`<input maxlength="1" inputmode="numeric" class="otpDigit" data-i="${i}" aria-label="Digit ${i+1}">`).join('')}
+    </div>
+    <div class="hint" id="otpHint">${demoCode ? (SIM_MODE ? 'Demo code: <b style="color:var(--text-mid)">' + demoCode + '</b>' : 'Demo code (dev): <b style="color:var(--text-mid)">' + demoCode + '</b>') : ''}</div>
+    ${isLogin ? `
+    <label class="agree" for="trustDevice">
+      <input type="checkbox" id="trustDevice">
+      <span>Trust this device for 30 days — skip the code next time.</span>
+    </label>` : ''}
+    <button class="btn" id="otpBtn" disabled>${isLogin ? 'Verify & log in' : 'Verify code'}</button>
+    <div class="resend">Didn't get it? <span class="link" id="resendLink">Resend code</span></div>
+    ${isLogin ? `<div class="login-row" style="margin-top:12px;">Not you? <button class="link" id="differentAccount">Use a different account</button></div>` : ''}
+    ${isReset ? `<div class="login-row" style="margin-top:12px;">Remembered it? <button class="link" id="rsBackFromOtp">Back to log in</button></div>` : ''}
+  `;
+}
+
+/* ── Validation ── */
+function bindEvents(step){
+  if(step === 'login'){
+    const fId    = document.getElementById('lId');
+    const fPass  = document.getElementById('lPass');
+    const btn    = document.getElementById('lBtn');
+    const hint   = document.getElementById('lIdHint');
+    document.querySelectorAll('.pw-toggle').forEach(t => {
+      t.addEventListener('click', () => {
+        const inp = document.getElementById(t.dataset.for);
+        if(!inp) return;
+        const show = inp.type === 'password';
+        inp.type = show ? 'text' : 'password';
+        t.textContent = show ? '🙈' : '👁';
+        t.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+      });
+    });
+    function validate(){
+      const idRaw = fId.value.trim();
+      const idOk = isValidId(idRaw);
+      fId.classList.toggle('ok', idOk && idRaw.length > 0);
+      fId.classList.toggle('err', idRaw.length > 0 && !idOk);
+      if(idRaw && !idOk){ hint.className = 'hint err'; hint.textContent = 'Enter a valid National ID number (6–9 digits).'; }
+      else if(idRaw){ hint.className = 'hint'; hint.textContent = 'Enter the National ID you registered with.'; }
+      btn.disabled = !(idOk && fPass.value.length > 0);
+    }
+    [fId, fPass].forEach(el => el.addEventListener('input', validate));
+    validate();
+
+    btn.addEventListener('click', async () => {
+      if(btn.disabled) return;
+      const idNumber = fId.value.trim();
+      btn.disabled = true;
+      btn.textContent = 'Logging in…';
+      if(SIM_MODE){
+        // Demo login: checks against the account registered on this device.
+        await new Promise(r => setTimeout(r, 600));
+        if(demoUser && demoUser.idNumber === idNumber && demoUser.password === fPass.value){
+          // Trusted device (set at OTP step) skips the code next time.
+          if(safeGet('betcrashTrustedDevice')){
+            setAuthTokens({ accessToken: 'demo-access-' + Date.now(), refreshToken: 'demo-refresh-' + Date.now() });
+            window.location.href = '/';
+            return;
+          }
+          userData.phone = demoUser.phone;
+          loginChallenge = 'demo-challenge-' + Date.now();
+          loginOtp = handleOtpRequest(requestOtp('login', demoUser.phone));
+          goTo('login_otp');
+        } else {
+          btn.disabled = false;
+          btn.textContent = 'Log in';
+          hint.className = 'hint err';
+          hint.textContent = demoUser
+            ? 'Incorrect National ID or password.'
+            : 'No account found on this device — tap Register to create one.';
+        }
+        return;
+      }
+      try {
+        const auth = await fetchJson(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          body: JSON.stringify({
+            idNumber,
+            password: fPass.value,
+            deviceToken: safeGet('betcrashDeviceToken') || undefined,
+          }),
+        }, false);
+        if(auth.demoCode){ loginOtp = auth.demoCode; showToast('📲 Demo OTP: ' + auth.demoCode + ' — expires in 5 min'); }
+        if(auth && auth.accessToken){
+          // Server considered this device trusted → straight in.
+          setAuthTokens(auth);
+          if(auth.deviceToken) safeSet('betcrashDeviceToken', auth.deviceToken);
+          window.location.href = '/';
+        } else {
+          // Password verified → OTP step required.
+          loginChallenge = (auth && auth.challengeId) || '';
+          userData.phone = (auth && auth.maskedPhone) || '';
+          goTo('login_otp');
+        }
+      } catch(err){
+        btn.disabled = false;
+        btn.textContent = 'Log in';
+        hint.className = 'hint err';
+        hint.textContent = err.message || 'Login failed — try again.';
+      }
+    });
+
+    document.getElementById('forgotLink').addEventListener('click', () => {
+      startReset();
+    });
+    document.getElementById('registerLink').addEventListener('click', () => setAuthMode('register'));
+    return;
+  }
+
+  if(step === 'login_otp'){
+    const digits = [...document.querySelectorAll('.otpDigit')];
+    digits[0].focus();
+    digits.forEach((d, i) => {
+      d.addEventListener('input', () => {
+        d.value = d.value.replace(/[^0-9]/g, '');
+        if(d.value && i < 5) digits[i + 1].focus();
+        checkOtp();
+      });
+      d.addEventListener('keydown', (e) => {
+        if(e.key === 'Backspace' && !d.value && i > 0) digits[i - 1].focus();
+      });
+    });
+    function checkOtp(){
+      const code = digits.map(d => d.value).join('');
+      const btn = document.getElementById('otpBtn');
+      const hint = document.getElementById('otpHint');
+      if(code.length === 6){
+        btn.disabled = false;
+        if(SIM_MODE && code !== loginOtp){
+          hint.className = 'hint err';
+          hint.innerHTML = 'Incorrect code — check the demo OTP above.';
+        }
+      } else {
+        btn.disabled = true;
+      }
+    }
+    document.getElementById('otpBtn').addEventListener('click', async () => {
+      const code = digits.map(d => d.value).join('');
+      const btn = document.getElementById('otpBtn');
+      const hint = document.getElementById('otpHint');
+      if(SIM_MODE){
+        const vLogin = verifyOtp(code, 'login');
+        if(vLogin !== 'ok'){
+          hint.className = 'hint err';
+          hint.innerHTML = otpErrMsg(vLogin);
+          return;
+        }
+        if(document.getElementById('trustDevice') && document.getElementById('trustDevice').checked){
+          safeSet('betcrashTrustedDevice', '1');
+        }
+        setAuthTokens({ accessToken: 'demo-access-' + Date.now(), refreshToken: 'demo-refresh-' + Date.now() });
+        window.location.href = '/';
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = 'Verifying…';
+      try {
+        const auth = await fetchJson(`${API_BASE}/auth/verify-login`, {
+          method: 'POST',
+          body: JSON.stringify({ challengeId: loginChallenge, code }),
+        }, false);
+        setAuthTokens(auth);
+        if(auth.deviceToken) safeSet('betcrashDeviceToken', auth.deviceToken);
+        window.location.href = '/';
+      } catch(err){
+        btn.disabled = false;
+        btn.textContent = 'Verify & log in';
+        hint.className = 'hint err';
+        hint.innerHTML = 'Incorrect or expired code — please try again.';
+      }
+    });
+    document.getElementById('resendLink').addEventListener('click', async (e) => {
+      e.target.textContent = 'Code resent ✓';
+      if(SIM_MODE){
+        loginOtp = handleOtpRequest(resendOtp('login', (demoUser && demoUser.phone) || ''));
+      } else {
+        try { await fetchJson(`${API_BASE}/auth/resend-otp`, { method: 'POST', body: JSON.stringify({ challengeId: loginChallenge }) }, false); }
+        catch(_){}
+      }
+      setTimeout(() => { e.target.textContent = 'Resend code'; }, 1800);
+    });
+    document.getElementById('differentAccount').addEventListener('click', () => setAuthMode('login'));
+    return;
+  }
+
+  /* ── Password reset bindings ── */
+  if(step === 'reset_id'){
+    const fId = document.getElementById('rsId');
+    const hint = document.getElementById('rsIdHint');
+    const btn = document.getElementById('rsBtn');
+    function validate(){ btn.disabled = !isValidId(fId.value.trim()); }
+    fId.addEventListener('input', validate);
+    validate();
+    btn.addEventListener('click', async () => {
+      const id = fId.value.trim();
+      btn.disabled = true;
+      btn.textContent = 'Sending code…';
+      if(SIM_MODE){
+        await new Promise(r => setTimeout(r, 600));
+        if(!demoUser || demoUser.idNumber !== id){
+          btn.disabled = false; btn.textContent = 'Request code';
+          hint.className = 'hint err';
+          hint.textContent = 'No account found for this National ID on this device.';
+          return;
+        }
+        resetId = id;
+        resetOtp = handleOtpRequest(requestOtp('reset', demoUser.phone));
+        resetStep = 1;
+        render();
+        return;
+      }
+      try {
+        const r = await fetchJson(`${API_BASE}/auth/reset-request`, { method:'POST', body: JSON.stringify({ idNumber: id }) }, false);
+        resetChallenge = r.challengeId;
+        if(r.demoCode){ resetOtp = r.demoCode; showToast('📲 Demo OTP: ' + r.demoCode + ' — expires in 5 min'); }
+        resetId = id;
+        resetStep = 1;
+        render();
+      } catch(err){
+        btn.disabled = false; btn.textContent = 'Request code';
+        hint.className = 'hint err';
+        hint.textContent = err.message || 'No account found for this National ID.';
+      }
+    });
+    document.getElementById('rsBack').addEventListener('click', () => setAuthMode('login'));
+    return;
+  }
+  if(step === 'reset_otp'){
+    const digits = [...document.querySelectorAll('.otpDigit')];
+    digits[0].focus();
+    digits.forEach((d, i) => {
+      d.addEventListener('input', () => {
+        d.value = d.value.replace(/[^0-9]/g, '');
+        if(d.value && i < 5) digits[i + 1].focus();
+        document.getElementById('otpBtn').disabled = digits.map(x => x.value).join('').length !== 6;
+      });
+      d.addEventListener('keydown', (e) => { if(e.key === 'Backspace' && !d.value && i > 0) digits[i - 1].focus(); });
+    });
+    document.getElementById('otpBtn').addEventListener('click', async () => {
+      const code = digits.map(d => d.value).join('');
+      const btn = document.getElementById('otpBtn');
+      const hint = document.getElementById('otpHint');
+      if(SIM_MODE){
+        const vReset = verifyOtp(code, 'reset');
+        if(vReset !== 'ok'){
+          hint.className = 'hint err';
+          hint.innerHTML = otpErrMsg(vReset);
+          return;
+        }
+        resetStep = 2;
+        render();
+        return;
+      }
+      btn.disabled = true; btn.textContent = 'Verifying…';
+      try {
+        const r = await fetchJson(`${API_BASE}/auth/reset-verify`, { method:'POST', body: JSON.stringify({ challengeId: resetChallenge, code }) }, false);
+        resetToken = r.resetToken;
+        resetStep = 2;
+        render();
+      } catch(err){
+        btn.disabled = false; btn.textContent = 'Verify code';
+        hint.className = 'hint err';
+        hint.innerHTML = 'Incorrect or expired code — please try again.';
+      }
+    });
+    document.getElementById('resendLink').addEventListener('click', (e) => {
+      e.target.textContent = 'Code resent ✓';
+      if(SIM_MODE){
+        resetOtp = handleOtpRequest(resendOtp('reset', (demoUser && demoUser.phone) || ''));
+      } else {
+        fetchJson(`${API_BASE}/auth/resend-otp`, { method:'POST', body: JSON.stringify({ challengeId: resetChallenge }) }, false).catch(()=>{});
+      }
+      setTimeout(() => { e.target.textContent = 'Resend code'; }, 1800);
+    });
+    return;
+  }
+  if(step === 'reset_new'){
+    const p1 = document.getElementById('rsPass');
+    const p2 = document.getElementById('rsPass2');
+    const hint = document.getElementById('rsPassHint');
+    const btn = document.getElementById('rsSaveBtn');
+    document.querySelectorAll('.pw-toggle').forEach(t => {
+      t.addEventListener('click', () => {
+        const inp = document.getElementById(t.dataset.for);
+        if(!inp) return;
+        const show = inp.type === 'password';
+        inp.type = show ? 'text' : 'password';
+        t.textContent = show ? '🙈' : '👁';
+        t.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+      });
+    });
+    function validate(){
+      if(p1.value && p1.value.length < 8){ hint.className = 'hint err'; hint.textContent = 'Password must be at least 8 characters.'; }
+      else if(p2.value && p1.value !== p2.value){ hint.className = 'hint err'; hint.textContent = 'Passwords do not match.'; }
+      else if(p1.value || p2.value){ hint.className = 'hint ok'; hint.textContent = '✓ Password looks good.'; }
+      else hint.textContent = '';
+      btn.disabled = !(p1.value.length >= 8 && p1.value === p2.value);
+    }
+    [p1, p2].forEach(el => el.addEventListener('input', validate));
+    validate();
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+      if(SIM_MODE){
+        await new Promise(r => setTimeout(r, 600));
+        // Save the new password into the demo account — next login uses it.
+        if(demoUser){
+          demoUser.password = p1.value;
+          safeSet('betcrashDemoUser', JSON.stringify(demoUser));
+        }
+        showToast('Password updated and saved');
+        resetStep = 3;
+        render();
+        return;
+      }
+      try {
+        await fetchJson(`${API_BASE}/auth/reset-password`, { method:'POST', body: JSON.stringify({ resetToken, newPassword: p1.value }) }, false);
+        resetStep = 3;
+        render();
+      } catch(err){
+        btn.disabled = false; btn.textContent = 'Save new password';
+        hint.className = 'hint err';
+        hint.textContent = err.message || 'Could not save the password — try again.';
+      }
+    });
+    return;
+  }
+  if(step === 'reset_done'){
+    document.getElementById('rsToLogin').addEventListener('click', () => setAuthMode('login'));
+    return;
+  }
+
+  if(step === 'register'){
+    const fId = document.getElementById('fId');
+    const fPhone = document.getElementById('fPhone');
+    const fPass = document.getElementById('fPass');
+    const fPass2 = document.getElementById('fPass2');
+    const idHint = document.getElementById('idHint');
+    const phoneHint = document.getElementById('phoneHint');
+    const passHint = document.getElementById('passHint');
+    const btn = document.getElementById('regBtn');
+
+    // Password visibility toggles
+    document.querySelectorAll('.pw-toggle').forEach(t => {
+      t.addEventListener('click', () => {
+        const inp = document.getElementById(t.dataset.for);
+        if(!inp) return;
+        const show = inp.type === 'password';
+        inp.type = show ? 'text' : 'password';
+        t.textContent = show ? '🙈' : '👁';
+        t.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+      });
+    });
+
+    function validate(){
+      const idRaw = fId.value.trim();
+      const idOk = isValidId(idRaw) && !REGISTERED_ID_NUMBERS.includes(idRaw);
+      fId.classList.toggle('ok', isValidId(idRaw) && idOk);
+      fId.classList.toggle('err', idRaw.length > 0 && !isValidId(idRaw));
+      if(idRaw && !isValidId(idRaw)) idHint.className = 'hint err', idHint.textContent = 'Enter a valid National ID number (6–9 digits).';
+      else if(idRaw && !idOk) idHint.className = 'hint err', idHint.textContent = 'This ID is already linked to an account.';
+      else if(idRaw) idHint.className = 'hint ok', idHint.textContent = '✓ ID available.';
+
+      const phoneOk = isValidPhone(fPhone.value);
+      fPhone.classList.toggle('ok', phoneOk && fPhone.value.trim().length > 0);
+      fPhone.classList.toggle('err', fPhone.value.trim().length > 0 && !phoneOk);
+      if(fPhone.value.trim() && !phoneOk) phoneHint.className = 'hint err', phoneHint.textContent = 'Enter a valid Kenyan number, e.g. 0712 345 678.';
+      else phoneHint.className = 'hint', phoneHint.textContent = "We'll send a verification code to this number.";
+
+      const p1 = fPass.value, p2 = fPass2.value;
+      if(p1 && p1.length < 8) passHint.className = 'hint err', passHint.textContent = 'Password must be at least 8 characters.';
+      else if(p2 && p1 !== p2) passHint.className = 'hint err', passHint.textContent = 'Passwords do not match.';
+      else if(p1 || p2) passHint.className = 'hint ok', passHint.textContent = '✓ Password looks good.';
+      else passHint.textContent = '';
+
+      btn.disabled = !(idOk && phoneOk && p1.length >= 8 && p1 === p2 && p1.length > 0);
+    }
+    ['input'].forEach(ev => {
+      [fId, fPhone, fPass, fPass2].forEach(el => el.addEventListener(ev, validate));
+    });
+    validate();
+
+    btn.addEventListener('click', async () => {
+      if(btn.disabled) return;
+      userData.idNumber = fId.value.trim();
+      userData.phone = normalizePhone(fPhone.value);
+      userData.password = fPass.value;
+      btn.disabled = true;
+      btn.textContent = 'Creating account…';
+
+      if(SIM_MODE){
+        // No server yet: simulate a successful sign-up with clearly-demo tokens.
+        await new Promise(r => setTimeout(r, 700));
+        REGISTERED_ID_NUMBERS.push(userData.idNumber);
+        // Keep a demo account on this device so the login flow can be tried end-to-end.
+        safeSet('betcrashDemoUser', JSON.stringify({ idNumber: userData.idNumber, phone: userData.phone, password: userData.password }));
+        setAuthTokens({ accessToken: 'demo-access-' + Date.now(), refreshToken: 'demo-refresh-' + Date.now() });
+        btn.textContent = 'Register';
+        pendingOtp = handleOtpRequest(requestOtp('register', userData.phone));
+        goTo('otp');
+        return;
+      }
+      try {
+        const auth = await fetchJson(`${API_BASE}/auth/register`, {
+          method: 'POST',
+          body: JSON.stringify({
+            idNumber: userData.idNumber,
+            phone: userData.phone,
+            password: userData.password,
+          }),
+        }, false);
+        if(auth.accessToken) setAuthTokens(auth);
+        if(auth.demoCode){ pendingOtp = auth.demoCode; showToast('📲 Demo OTP: ' + auth.demoCode + ' — expires in 5 min'); }
+        goTo('otp');
+      } catch(err){
+        btn.disabled = false;
+        btn.textContent = 'Register';
+        idHint.className = 'hint err';
+        idHint.textContent = err.message || 'Registration failed — try again.';
+      }
+    });
+
+    document.getElementById('loginLink').addEventListener('click', () => setAuthMode('login'));
+  }
+
+  if(step === 'otp'){
+    const digits = [...document.querySelectorAll('.otpDigit')];
+    digits[0].focus();
+    digits.forEach((d, i) => {
+      d.addEventListener('input', () => {
+        d.value = d.value.replace(/[^0-9]/g, '');
+        if(d.value && i < 5) digits[i + 1].focus();
+        checkOtp();
+      });
+      d.addEventListener('keydown', (e) => {
+        if(e.key === 'Backspace' && !d.value && i > 0) digits[i - 1].focus();
+      });
+    });
+    function checkOtp(){
+      const code = digits.map(d => d.value).join('');
+      const btn = document.getElementById('otpBtn');
+      const hint = document.getElementById('otpHint');
+      if(code.length === 6){
+        if(SIM_MODE){
+          if(code === pendingOtp){
+            btn.disabled = false;
+            hint.className = 'hint ok';
+            hint.innerHTML = '✓ Code confirmed.';
+          } else {
+            btn.disabled = true;
+            hint.className = 'hint err';
+            hint.innerHTML = 'Incorrect code — check the demo OTP above.';
+          }
+        } else {
+          btn.disabled = false; // server validates on click
+          hint.className = 'hint';
+          hint.innerHTML = '';
+        }
+      } else {
+        btn.disabled = true;
+      }
+    }
+    document.getElementById('otpBtn').addEventListener('click', async () => {
+      const code = digits.map(d => d.value).join('');
+      const btn = document.getElementById('otpBtn');
+      const hint = document.getElementById('otpHint');
+      if(SIM_MODE){
+        const vReg = verifyOtp(code, 'register');
+        if(vReg !== 'ok'){
+          hint.className = 'hint err';
+          hint.innerHTML = otpErrMsg(vReg);
+          return;
+        }
+        btn.disabled = true;
+        goTo('done');
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = 'Verifying…';
+      try {
+        await fetchJson(`${API_BASE}/auth/verify-otp`, {
+          method: 'POST',
+          body: JSON.stringify({ phone: userData.phone, code }),
+        }, false);
+        goTo('done');
+      } catch(err){
+        btn.disabled = false;
+        btn.textContent = 'Verify code';
+        hint.className = 'hint err';
+        hint.innerHTML = 'Incorrect or expired code — please try again.';
+      }
+    });
+    document.getElementById('resendLink').addEventListener('click', async (e) => {
+      e.target.textContent = 'Code resent ✓';
+      if(SIM_MODE){
+        pendingOtp = handleOtpRequest(resendOtp('register', userData.phone));
+      } else {
+        try { await fetchJson(`${API_BASE}/auth/resend-otp`, { method: 'POST', body: JSON.stringify({ phone: userData.phone }) }, false); }
+        catch(_){}
+      }
+      setTimeout(() => { e.target.textContent = 'Resend code'; }, 1800);
+    });
+  }
+
+  if(step === 'done'){
+    document.getElementById('toWallet').addEventListener('click', () => { window.location.href = '/wallet'; });
+    document.getElementById('toGame').addEventListener('click', () => { window.location.href = '/'; });
+  }
+}
+
+/* ── Toast ── */
+function showToast(text){
+  const t = document.getElementById('toast');
+  t.textContent = text;
+  t.style.opacity = '1';
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 3000);
+}
+
+applyMode();
+renderStepper();
+render();
+</script>
+
+<footer class="site-footer">
+  <div class="foot-inner">
+    <span class="foot-18" aria-hidden="true">18+</span>
+    <span>Play responsibly — gambling can be addictive.</span>
+    <a href="/responsible-gaming">Responsible gaming &amp; help</a>
+    <span>24/7 helpline: <a href="https://www.responsiblegambling.or.ke/">0705 825 637</a></span>
+    <button class="foot-btn" data-bc="terms">Terms</button>
+    <button class="foot-btn" data-bc="privacy">Privacy</button></div>
+</footer>
+<!-- ═══ TERMS & PRIVACY MODALS ═══ -->
+<style>
+.bc-modal-bg{position:fixed;inset:0;z-index:9600;background:rgba(6,5,20,.75);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:20px;}
+.bc-modal-bg.open{display:flex;}
+.bc-modal{background:var(--panel);border:1px solid var(--panel-line);border-radius:16px;width:min(680px,94vw);max-height:82vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.6);}
+.bc-modal-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--panel-line);background:rgba(14,12,43,.35);}
+.bc-modal-head h3{font-family:'Space Grotesk';font-size:16px;margin:0;}
+.bc-modal-close{background:var(--panel-raised);border:1px solid var(--panel-line);color:var(--text-mid);width:32px;height:32px;border-radius:9px;cursor:pointer;font-size:14px;flex:0 0 auto;}
+.bc-modal-close:hover{color:var(--text-hi);border-color:var(--green);}
+.bc-modal-body{overflow-y:auto;padding:18px 22px;font-size:13px;line-height:1.7;color:var(--text-mid);}
+.bc-modal-body h4{font-family:'Space Grotesk';color:var(--text-hi);font-size:13.5px;margin:18px 0 6px;}
+.bc-modal-body h4:first-child{margin-top:0;}
+.bc-modal-body p{margin:0 0 10px;}
+.bc-modal-body b{color:var(--text-hi);}
+.foot-btn{background:none;border:none;color:var(--text-mid);font-size:12px;cursor:pointer;padding:0;font-family:'Inter',sans-serif;text-decoration:underline;text-underline-offset:3px;}
+.foot-btn:hover{color:var(--green);}
+@media (max-width:640px){ .bc-modal-body{padding:14px 16px;font-size:12.5px;} }
+</style>
+<div class="bc-modal-bg" id="bcModalBg" role="dialog" aria-modal="true" aria-labelledby="bcModalTitle">
+  <div class="bc-modal">
+    <div class="bc-modal-head"><h3 id="bcModalTitle">Terms &amp; Conditions</h3><button class="bc-modal-close" id="bcModalClose" aria-label="Close">✕</button></div>
+    <div class="bc-modal-body" id="bcModalBody"></div>
+  </div>
+</div>
+<script>
+(function(){
+  var TERMS = `<h4>1. Acceptance</h4>
+<p>By accessing or registering on BetCrash you agree to these Terms &amp; Conditions. If you do not agree, do not use the service. BetCrash is operated from Kenya and these terms are governed by Kenyan law.</p>
+<h4>2. Eligibility &amp; accounts</h4>
+<p>You must be <b>18 years or older</b> to use BetCrash. You may hold <b>one account only</b>, tied to your National ID number — the unique identifier for your account. You must provide accurate information (name, phone, ID) and keep your password confidential. BetCrash may suspend or close accounts that breach these terms.</p>
+<h4>3. Current status — simulation</h4>
+<p>Until a licensed live operation launches, BetCrash runs in <b>simulation mode</b>: balances, rounds, bots and transactions are demo data and no real money is involved. Live betting will only activate after the necessary Kenyan licensing (BCLB) and payment integrations are in place, at which point these terms will be updated.</p>
+<h4>4. The game</h4>
+<p>BetCrash is a crash-style game: a multiplier rises until the round crashes. You win if you cash out before the crash. The house edge is <b>3%</b>. In live mode every round is <b>provably fair</b> — the crash point is committed before the round via a seed hash and verifiable afterwards.</p>
+<h4>5. Deposits, withdrawals &amp; KYC</h4>
+<p>Payments use M-Pesa. Identity verification (KYC) is required before withdrawals; withdrawals are protected by a one-time code sent to your registered phone, and amounts above the instant limit are queued for review. BetCrash may refuse or reverse transactions suspected of fraud.</p>
+<h4>6. Responsible play</h4>
+<p>Gambling should be entertainment, not a way to make money. Only bet what you can afford to lose. Help is available 24/7: <b>0705 825 637</b> (Responsible Gambling Kenya) or GamHelp Kenya <b>+254 726 883 960</b>. See the Responsible Gaming page for limits and self-exclusion.</p>
+<h4>7. Prohibited conduct</h4>
+<p>Fraud, multi-accounting, use of automated betting tools in live play, exploiting faults, and attempting to manipulate rounds or payments are prohibited and will lead to closure and forfeiture.</p>
+<h4>8. Liability</h4>
+<p>BetCrash is provided "as is". To the extent permitted by law, we are not liable for indirect losses, service interruptions, or losses from breach of these terms by you. In simulation mode no financial liability exists because no real money is involved.</p>
+<h4>9. Changes</h4>
+<p>These terms may change as the platform evolves (e.g., when live betting launches). Continued use after changes constitutes acceptance. Contact: <b>support@betcrash.co.ke</b>.</p>`;
+  var PRIVACY = `<h4>What we collect</h4>
+<p><b>Identity:</b> National ID number, full name, date of birth, phone number, email. Your National ID is your unique account identifier. <b>Usage:</b> device, browser, operating system, IP address, session activity. <b>Financial:</b> transaction history (deposits, withdrawals, bets, wins). <b>Security:</b> login events, OTP verification events, audit logs of account actions.</p>
+<h4>How we use it</h4>
+<p>To create and secure your account, verify your identity (KYC), process payments, run the game and settle bets, prevent fraud, comply with Kenyan law (including the Data Protection Act 2019 and BCLB requirements), and improve the service. We do not sell your data.</p>
+<h4>OTP &amp; SMS security</h4>
+<p>One-time codes are generated for registration, login, withdrawals and password resets. Codes are stored <b>hashed</b>, expire within minutes, are single-use, and are limited in attempts — they are never stored in plaintext. SMS is delivered through licensed providers using your phone number only.</p>
+<h4>Sharing</h4>
+<p>We share data only with: SMS and payment providers (e.g., M-Pesa) strictly to deliver the service, and regulators (e.g., ODPC, BCLB) when legally required. In live mode, aggregated statistics may be published; never your personal details.</p>
+<h4>Storage &amp; security</h4>
+<p>Passwords are stored hashed, codes are hashed, data travels encrypted, and access to your data is restricted to authorised staff with least-privilege roles and full audit trails.</p>
+<h4>Retention</h4>
+<p>We keep records as long as your account is active and as required by Kenyan law for financial and regulatory reporting. You may request deletion where the law permits.</p>
+<h4>Your rights</h4>
+<p>You may request access to, correction of, or deletion of your personal data, and may lodge a complaint with the Office of the Data Protection Commissioner (ODPC) at <b>info@odpc.go.ke</b>. Requests can be sent to <b>privacy@betcrash.co.ke</b>.</p>`;
+  var bg = document.getElementById('bcModalBg');
+  var body = document.getElementById('bcModalBody');
+  var title = document.getElementById('bcModalTitle');
+  function openModal(kind){
+    if(!bg) return;
+    if(kind === 'privacy'){ title.textContent = 'Privacy Policy'; body.innerHTML = PRIVACY; }
+    else { title.textContent = 'Terms & Conditions'; body.innerHTML = TERMS; }
+    bg.classList.add('open');
+    body.scrollTop = 0;
+  }
+  function closeModal(){ if(bg) bg.classList.remove('open'); }
+  document.querySelectorAll('[data-bc]').forEach(function(b){
+    b.addEventListener('click', function(){ openModal(b.getAttribute('data-bc')); });
+  });
+  var closeBtn = document.getElementById('bcModalClose');
+  if(closeBtn) closeBtn.addEventListener('click', closeModal);
+  if(bg) bg.addEventListener('click', function(e){ if(e.target === bg) closeModal(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeModal(); });
+})();
+</script>
+</body>
+</html>
