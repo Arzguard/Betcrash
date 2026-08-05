@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BetCrash — Fairness</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#16123A">
+<meta name="betcrash-api-url" content="">
+<link rel="icon" href="/favicon/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#16123A; --panel:#2A236B; --panel-raised:#211B55; --panel-line:#39327E;
+  --green:#38F29F; --green-dim:rgba(56,242,159,0.14);
+  --yellow:#FFD24A; --yellow-dim:rgba(255,210,74,0.13);
+  --red:#FF4D6D; --text-hi:#FFFFFF; --text-mid:#A8A4D6; --text-low:#706A9B;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0; background:var(--void); color:var(--text-hi);
+  font-family:'Inter',system-ui,sans-serif; font-size:15px; line-height:1.65;
+  display:flex; flex-direction:column; min-height:100vh;
+}
+.topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 22px; border-bottom:1px solid var(--panel-line);
+  position:sticky; top:0; background:rgba(22,18,58,.92); backdrop-filter:blur(8px); z-index:20;
+}
+.brand{ display:flex; align-items:center; gap:10px; text-decoration:none; }
+.brand-mark{
+  width:34px; height:34px; border-radius:10px; background:var(--panel);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Space Grotesk'; font-weight:700; font-size:13px; color:var(--yellow);
+  border:1px solid var(--panel-line);
+}
+.brand-name{ font-family:'Space Grotesk'; font-weight:700; font-size:17px; }
+.brand-name span{ color:var(--yellow); }
+.back-link{ color:var(--text-mid); text-decoration:none; font-size:13px; font-weight:600; }
+.back-link:hover{ color:var(--green); }
+
+.wrap{ width:100%; max-width:760px; margin:0 auto; padding:28px 22px 60px; flex:1; }
+h1{ font-family:'Space Grotesk'; font-size:30px; margin:0 0 6px; }
+.sub{ color:var(--text-mid); margin:0 0 26px; font-size:14px; }
+h2{ font-family:'Space Grotesk'; font-size:19px; margin:34px 0 10px; }
+p{ color:var(--text-mid); margin:0 0 12px; }
+code, pre{
+  font-family:'JetBrains Mono',monospace; background:var(--panel-raised);
+  border:1px solid var(--panel-line); border-radius:8px;
+}
+code{ padding:1px 6px; font-size:13px; }
+pre{ padding:14px; overflow-x:auto; font-size:12.5px; line-height:1.6; color:var(--green); }
+
+.card{
+  background:var(--panel); border:1px solid var(--panel-line);
+  border-radius:14px; padding:16px 18px; margin:12px 0;
+}
+.card .k{ font-family:'JetBrains Mono'; font-size:11px; color:var(--text-low); text-transform:uppercase; letter-spacing:.08em; }
+.card .v{ font-family:'JetBrains Mono'; font-size:14px; margin-top:4px; }
+
+.status-box{
+  display:flex; gap:12px; align-items:flex-start;
+  background:var(--yellow-dim); border:1px solid rgba(255,210,74,.4);
+  border-radius:12px; padding:14px 16px; font-size:13.5px; color:#FFE9B0;
+}
+.status-box.live{ background:var(--green-dim); border-color:rgba(56,242,159,.4); color:#CFFBE7; }
+.status-box b{ color:#fff; }
+
+ul{ margin:0 0 12px; padding-left:20px; }
+li{ color:var(--text-mid); margin-bottom:6px; }
+li b{ color:var(--text-hi); }
+.steps{ counter-reset:s; list-style:none; padding:0; }
+.steps li{ counter-increment:s; position:relative; padding-left:34px; }
+.steps li::before{
+  content:counter(s); position:absolute; left:0; top:1px;
+  width:22px; height:22px; border-radius:7px; background:var(--green-dim);
+  border:1px solid rgba(56,242,159,.4); color:var(--green);
+  font-family:'JetBrains Mono'; font-size:12px; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+}
+
+.site-footer{
+  border-top:1px solid var(--panel-line); background:rgba(14,12,43,.8);
+  padding:14px 22px; font-size:12px; color:var(--text-low);
+}
+.foot-inner{ max-width:760px; margin:0 auto; display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; }
+.foot-inner a{ color:var(--text-mid); text-decoration:none; }
+.foot-inner a:hover{ color:var(--green); }
+.foot-18{ border:1px solid var(--yellow); color:var(--yellow); border-radius:6px; padding:1px 7px; font-weight:700; font-size:11px; font-family:'JetBrains Mono'; }
+
+
+  /* Footer: clean and centered on small screens */
+  @media (max-width:640px){
+    .site-footer{ padding:12px 14px 16px; }
+    .foot-inner{ justify-content:center; gap:6px 12px; font-size:11.5px; text-align:center; }
+    .foot-inner .foot-18{ order:-1; }
+    .foot-btn{ font-size:11.5px; }
+  }
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ animation-duration:.01ms !important; transition-duration:.01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="/" aria-label="BetCrash home">
+    <div class="brand-mark">BC</div>
+    <div class="brand-name">Bet<span>Crash</span></div>
+  </a>
+  <a class="back-link" href="/">← Back to game</a>
+</header>
+
+<main class="wrap">
+  <h1>Fairness</h1>
+  <p class="sub">How crash points are determined — and how you can verify every round yourself.</p>
+
+  <div class="status-box" id="statusBox">
+    <span aria-hidden="true">🧪</span>
+    <div id="statusText"><b>Simulation mode.</b> The game server isn't connected yet, so rounds you see right now are generated in your browser and clearly labelled — there is nothing to verify yet. When the server goes live, this page will switch to "live" automatically and the scheme below takes effect.</div>
+  </div>
+
+  <h2>What "provably fair" means</h2>
+  <p>A crash round is provably fair when the crash point is <b>fixed before the round starts</b> — by the house, without knowing your bet — and you can <b>verify afterwards</b> that the number you saw was the one that was committed. Neither side can cheat: the house can't steer rounds after seeing bets, and you can't fake a win.</p>
+
+  <h2>How crash points will be generated (server)</h2>
+  <p>Every round uses three inputs:</p>
+  <ul>
+    <li><b>Server seed</b> — a random 64-character hex string, generated and kept secret by the server during the round.</li>
+    <li><b>Client seed</b> — a string you can choose (and change any time) from your account. Until you change it, the same client seed is reused so your results stay verifiable.</li>
+    <li><b>Nonce</b> — a counter that increases by 1 every round you play, so the same seeds can never produce the same round twice.</li>
+  </ul>
+  <p>Before the round, the server publishes the <b>SHA-256 hash of the server seed</b> (a "commitment" — 64 hex characters that can't be reversed). The crash point is then derived with an industry-standard formula (the same one used by Bustabit and similar sites), with a 3% house edge:</p>
+  <pre>h     = parseInt( sha256(serverSeed + clientSeed + nonce).slice(0, 13), 16 )
+e     = 2 ** 52 / h
+crash = max(1, floor(e * (1 - houseEdge) * 100) / 100)   // houseEdge = 0.03</pre>
+  <p>The 3% house edge means that over many rounds the game returns 97% of stakes — that's the built-in advantage, visible to everyone, not hidden.</p>
+
+  <h2>Verifying a round</h2>
+  <ol class="steps">
+    <li>Before the round starts, note the <b>server seed hash</b>, your <b>client seed</b> and the <b>nonce</b> (shown on the round screen).</li>
+    <li>After the round crashes, the server reveals the <b>server seed</b>.</li>
+    <li>Run the formula below (or any independent verifier) and confirm the result matches the crash point you saw.</li>
+  </ol>
+  <p>Paste this into your browser console while on the game page — it needs no external tools:</p>
+  <pre>async function verifyCrash(serverSeed, clientSeed, nonce, houseEdge = 0.03){
+  const buf    = new TextEncoder().encode(serverSeed + clientSeed + nonce);
+  const digest = await crypto.subtle.digest('SHA-256', buf);
+  const hex    = [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2,'0')).join('');
+  const h      = parseInt(hex.slice(0, 13), 16);
+  const e      = 2 ** 52 / h;
+  return Math.max(1, Math.floor(e * (1 - houseEdge) * 100) / 100);
+}
+verifyCrash('&lt;server seed&gt;', '&lt;client seed&gt;', &lt;nonce&gt;).then(console.log)</pre>
+
+  <h2>Seed rotation</h2>
+  <p>The server seed is replaced after every <b>1,000 rounds</b>, and the previous seed is revealed at the moment of rotation. This guarantees the house can never selectively "re-seed" after a bad result.</p>
+
+  <h2>Current status</h2>
+  <div class="card">
+    <div class="k">Game server</div>
+    <div class="v">Not connected — rounds are simulated in your browser and labelled as such. Real, verifiable rounds will start when the server ships.</div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="foot-inner">
+    <span class="foot-18" aria-hidden="true">18+</span>
+    <span>Play responsibly — gambling can be addictive.</span>
+    <a href="/responsible-gaming">Responsible gaming &amp; help</a>
+    <span>24/7 helpline: <a href="https://www.responsiblegambling.or.ke/">0705 825 637</a></span>
+    <button class="foot-btn" data-bc="terms">Terms</button>
+    <button class="foot-btn" data-bc="privacy">Privacy</button></div>
+</footer>
+
+<script>
+/* The fairness page mirrors the game page's mode: server configured = live. */
+(function(){
+  var m = document.querySelector('meta[name="betcrash-api-url"]');
+  var live = !!(m && m.content && m.content.trim());
+  var box = document.getElementById('statusBox');
+  var txt = document.getElementById('statusText');
+  if(live){
+    box.className = 'status-box live';
+    box.querySelector('span').textContent = '✓';
+    txt.innerHTML = '<b>Live server connected.</b> Rounds are generated server-side and verifiable with the scheme below. The seed hash for the current round is shown on the game screen.';
+  }
+})();
+</script>
+<!-- ═══ TERMS & PRIVACY MODALS ═══ -->
+<style>
+.bc-modal-bg{position:fixed;inset:0;z-index:9600;background:rgba(6,5,20,.75);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:20px;}
+.bc-modal-bg.open{display:flex;}
+.bc-modal{background:var(--panel);border:1px solid var(--panel-line);border-radius:16px;width:min(680px,94vw);max-height:82vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.6);}
+.bc-modal-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--panel-line);background:rgba(14,12,43,.35);}
+.bc-modal-head h3{font-family:'Space Grotesk';font-size:16px;margin:0;}
+.bc-modal-close{background:var(--panel-raised);border:1px solid var(--panel-line);color:var(--text-mid);width:32px;height:32px;border-radius:9px;cursor:pointer;font-size:14px;flex:0 0 auto;}
+.bc-modal-close:hover{color:var(--text-hi);border-color:var(--green);}
+.bc-modal-body{overflow-y:auto;padding:18px 22px;font-size:13px;line-height:1.7;color:var(--text-mid);}
+.bc-modal-body h4{font-family:'Space Grotesk';color:var(--text-hi);font-size:13.5px;margin:18px 0 6px;}
+.bc-modal-body h4:first-child{margin-top:0;}
+.bc-modal-body p{margin:0 0 10px;}
+.bc-modal-body b{color:var(--text-hi);}
+.foot-btn{background:none;border:none;color:var(--text-mid);font-size:12px;cursor:pointer;padding:0;font-family:'Inter',sans-serif;text-decoration:underline;text-underline-offset:3px;}
+.foot-btn:hover{color:var(--green);}
+@media (max-width:640px){ .bc-modal-body{padding:14px 16px;font-size:12.5px;} }
+</style>
+<div class="bc-modal-bg" id="bcModalBg" role="dialog" aria-modal="true" aria-labelledby="bcModalTitle">
+  <div class="bc-modal">
+    <div class="bc-modal-head"><h3 id="bcModalTitle">Terms &amp; Conditions</h3><button class="bc-modal-close" id="bcModalClose" aria-label="Close">✕</button></div>
+    <div class="bc-modal-body" id="bcModalBody"></div>
+  </div>
+</div>
+<script>
+(function(){
+  var TERMS = `<h4>1. Acceptance</h4>
+<p>By accessing or registering on BetCrash you agree to these Terms &amp; Conditions. If you do not agree, do not use the service. BetCrash is operated from Kenya and these terms are governed by Kenyan law.</p>
+<h4>2. Eligibility &amp; accounts</h4>
+<p>You must be <b>18 years or older</b> to use BetCrash. You may hold <b>one account only</b>, tied to your National ID number — the unique identifier for your account. You must provide accurate information (name, phone, ID) and keep your password confidential. BetCrash may suspend or close accounts that breach these terms.</p>
+<h4>3. Current status — simulation</h4>
+<p>Until a licensed live operation launches, BetCrash runs in <b>simulation mode</b>: balances, rounds, bots and transactions are demo data and no real money is involved. Live betting will only activate after the necessary Kenyan licensing (BCLB) and payment integrations are in place, at which point these terms will be updated.</p>
+<h4>4. The game</h4>
+<p>BetCrash is a crash-style game: a multiplier rises until the round crashes. You win if you cash out before the crash. The house edge is <b>3%</b>. In live mode every round is <b>provably fair</b> — the crash point is committed before the round via a seed hash and verifiable afterwards.</p>
+<h4>5. Deposits, withdrawals &amp; KYC</h4>
+<p>Payments use M-Pesa. Identity verification (KYC) is required before withdrawals; withdrawals are protected by a one-time code sent to your registered phone, and amounts above the instant limit are queued for review. BetCrash may refuse or reverse transactions suspected of fraud.</p>
+<h4>6. Responsible play</h4>
+<p>Gambling should be entertainment, not a way to make money. Only bet what you can afford to lose. Help is available 24/7: <b>0705 825 637</b> (Responsible Gambling Kenya) or GamHelp Kenya <b>+254 726 883 960</b>. See the Responsible Gaming page for limits and self-exclusion.</p>
+<h4>7. Prohibited conduct</h4>
+<p>Fraud, multi-accounting, use of automated betting tools in live play, exploiting faults, and attempting to manipulate rounds or payments are prohibited and will lead to closure and forfeiture.</p>
+<h4>8. Liability</h4>
+<p>BetCrash is provided "as is". To the extent permitted by law, we are not liable for indirect losses, service interruptions, or losses from breach of these terms by you. In simulation mode no financial liability exists because no real money is involved.</p>
+<h4>9. Changes</h4>
+<p>These terms may change as the platform evolves (e.g., when live betting launches). Continued use after changes constitutes acceptance. Contact: <b>support@betcrash.co.ke</b>.</p>`;
+  var PRIVACY = `<h4>What we collect</h4>
+<p><b>Identity:</b> National ID number, full name, date of birth, phone number, email. Your National ID is your unique account identifier. <b>Usage:</b> device, browser, operating system, IP address, session activity. <b>Financial:</b> transaction history (deposits, withdrawals, bets, wins). <b>Security:</b> login events, OTP verification events, audit logs of account actions.</p>
+<h4>How we use it</h4>
+<p>To create and secure your account, verify your identity (KYC), process payments, run the game and settle bets, prevent fraud, comply with Kenyan law (including the Data Protection Act 2019 and BCLB requirements), and improve the service. We do not sell your data.</p>
+<h4>OTP &amp; SMS security</h4>
+<p>One-time codes are generated for registration, login, withdrawals and password resets. Codes are stored <b>hashed</b>, expire within minutes, are single-use, and are limited in attempts — they are never stored in plaintext. SMS is delivered through licensed providers using your phone number only.</p>
+<h4>Sharing</h4>
+<p>We share data only with: SMS and payment providers (e.g., M-Pesa) strictly to deliver the service, and regulators (e.g., ODPC, BCLB) when legally required. In live mode, aggregated statistics may be published; never your personal details.</p>
+<h4>Storage &amp; security</h4>
+<p>Passwords are stored hashed, codes are hashed, data travels encrypted, and access to your data is restricted to authorised staff with least-privilege roles and full audit trails.</p>
+<h4>Retention</h4>
+<p>We keep records as long as your account is active and as required by Kenyan law for financial and regulatory reporting. You may request deletion where the law permits.</p>
+<h4>Your rights</h4>
+<p>You may request access to, correction of, or deletion of your personal data, and may lodge a complaint with the Office of the Data Protection Commissioner (ODPC) at <b>info@odpc.go.ke</b>. Requests can be sent to <b>privacy@betcrash.co.ke</b>.</p>`;
+  var bg = document.getElementById('bcModalBg');
+  var body = document.getElementById('bcModalBody');
+  var title = document.getElementById('bcModalTitle');
+  function openModal(kind){
+    if(!bg) return;
+    if(kind === 'privacy'){ title.textContent = 'Privacy Policy'; body.innerHTML = PRIVACY; }
+    else { title.textContent = 'Terms & Conditions'; body.innerHTML = TERMS; }
+    bg.classList.add('open');
+    body.scrollTop = 0;
+  }
+  function closeModal(){ if(bg) bg.classList.remove('open'); }
+  document.querySelectorAll('[data-bc]').forEach(function(b){
+    b.addEventListener('click', function(){ openModal(b.getAttribute('data-bc')); });
+  });
+  var closeBtn = document.getElementById('bcModalClose');
+  if(closeBtn) closeBtn.addEventListener('click', closeModal);
+  if(bg) bg.addEventListener('click', function(e){ if(e.target === bg) closeModal(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeModal(); });
+})();
+</script>
+</body>
+</html>
