@@ -1,9 +1,0 @@
-{
-  "name": "betcrash-sms-ivs",
-  "version": "1.0.0",
-  "description": "SMS Identity Verification Service (SMS-IVS v1.0) — centralized OTP service",
-  "main": "server.js",
-  "scripts": { "start": "node server.js" },
-  "engines": { "node": ">=18" },
-  "license": "UNLICENSED"
-}
