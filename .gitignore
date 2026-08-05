@@ -12,6 +12,9 @@ apps/backend/.env
 apps/backend/.env.local
 apps/backend/tsconfig.build.tsbuildinfo
 
+# Canonical project backend data (runtime, do not commit)
+BetCrash full Project/backend/data/
+
 # Editor files
 .vscode/
 .idea/
